@@ -1,38 +1,31 @@
-import React, { useState } from "react";
-import { ChevronRight } from "lucide-react";
-
-// Importing Components
-import Features from './components/Features';
-import Contact from './pages/Contact';
-import Home from './pages/Home';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import About from "./pages/About";
+import Home from './pages/Home';
+import Features from './components/Features';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import Login from './pages/Login'; // Import the Login component
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState("home");
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case "home":
-        return <Home />;
-      case "features":
-        return <Features />;
-      case "about":
-        return <About />;
-      case "contact":
-        return <Contact />;
-      default:
-        return <Home />;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Navbar onNavigate={setCurrentPage} />
-      <main className="flex-grow">{renderPage()}</main>
-      <Footer />
-    </div>
+    <Router>
+      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+        <Navbar />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login/:loginType" element={<Login />} /> {/* Route for login */}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 };
 
