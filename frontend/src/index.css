@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@layer base {
+  /* Define custom colors */
+  .bg-primary {
+    background-color: #1E40AF; /* Blue color */
+  }
+
+  .text-primary {
+    color: #1E40AF; /* Blue color */
+  }
+
+  .text-secondary {
+    color: #6B7280; /* Gray color */
+  }
+
+  .bg-accent {
+    background-color: #10B981; /* Accent green */
+  }
+
+  /* Define custom font-family */
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+}
