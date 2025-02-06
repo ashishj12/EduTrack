@@ -25,7 +25,7 @@ const Login = () => {
         {/* Left Section - Image */}
         <div className="relative">
           <img
-            src="https://via.placeholder.com/500" // Replace with your valid image URL
+            src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg?t=st=1738773901~exp=1738777501~hmac=decb05aa76af5cbdf8880e1c49ec1d1717efc7f7767f3ff3bc0c96dc8cdea8d6&w=740" // Replace with your valid image URL
             alt="Login Illustration"
             className="w-full h-full object-cover"
           />

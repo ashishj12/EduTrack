@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import Features from './components/Features';
 import Contact from './pages/Contact';
 import About from './pages/About';
-import Login from './pages/Login'; // Import the Login component
+import Login from './pages/Login'; 
 
 const App = () => {
   return (
