@@ -1,13 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Features from './components/Features';
-import Contact from './pages/Contact';
-import About from './pages/About';
-import Login from './pages/Login'; 
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Navbar from "./components/HomePage/Navbar";
+import Footer from "./components/HomePage/Footer";
+import Home from "./pages/HomePage/Home";
+import Features from "./components/HomePage/Features";
+import Contact from "./pages/HomePage/Contact";
+import About from "./pages/HomePage/About";
+import Login from "./pages/HomePage/Login";
 
 const App = () => {
   return (
@@ -20,7 +20,8 @@ const App = () => {
             <Route path="/features" element={<Features />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/login/:loginType" element={<Login />} /> {/* Route for login */}
+            <Route path="/login/:loginType" element={<Login />} />{" "}
+            {/* Route for login */}
           </Routes>
         </main>
         <Footer />
