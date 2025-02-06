@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // React Router hook to get route params
+import { useNavigate, useParams } from "react-router-dom"; // React Router hooks
 
 const Login = () => {
   const { loginType } = useParams(); // Get the login type from the URL
   const [currentLoginType, setCurrentLoginType] = useState(loginType || "student"); // Default login type
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     if (loginType) {
@@ -17,6 +19,11 @@ const Login = () => {
     e.preventDefault();
     console.log(`${currentLoginType} logged in with email: ${email}`);
     // Authentication logic should go here
+  };
+
+  const handleToggleLoginType = (type) => {
+    setCurrentLoginType(type);
+    navigate(`/login/${type}`); // Change the route dynamically
   };
 
   return (
@@ -42,7 +49,7 @@ const Login = () => {
               {["student", "faculty"].map((type) => (
                 <button
                   key={type}
-                  onClick={() => setCurrentLoginType(type)}
+                  onClick={() => handleToggleLoginType(type)} // Change route and set login type
                   className={`px-4 py-2 rounded-lg transition ${
                     currentLoginType === type
                       ? "bg-blue-600 text-white"
