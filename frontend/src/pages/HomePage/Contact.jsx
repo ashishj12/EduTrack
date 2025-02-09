@@ -5,7 +5,7 @@ const Contact = () => {
   const teamMembers = [
     {
       name: "Lokendra Singh",
-      role: "ML Enginner",
+      role: "ML Engineer",
       email: "sbcet@edutrack.com",
       phone: "+91 8209874519",
     },
