@@ -1,51 +1,69 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  HomeIcon, 
-  UserGroupIcon, 
-  DocumentChartBarIcon 
-} from '@heroicons/react/24/outline';
+import { Home, Users, FileBarChart, X } from 'lucide-react';
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+export default function Sidebar({ isOpen, onClose }) {
+  const sidebarClasses = `
+    w-64 h-screen bg-white border-r border-gray-200 fixed left-0 top-0 z-20
+    transform transition-transform duration-300 ease-in-out
+    md:transform-none
+    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+  `;
 
   return (
-    <div className={`w-64 h-screen bg-white border-r border-gray-200 fixed left-0 top-0 transform transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-8">
-          <span className="text-blue-600 text-2xl">📚</span>
-          <h1 className="text-xl font-bold">EduTrack</h1>
-        </div>
-        
-        <nav className="space-y-2">
-          <Link to="/" className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg">
-            <HomeIcon className="w-5 h-5" />
-            <span>Dashboard</span>
-          </Link>
-          
-          <Link to="/students" className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg">
-            <UserGroupIcon className="w-5 h-5" />
-            <span>Students</span>
-          </Link>
-          
-          <Link to="/reports" className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg">
-            <DocumentChartBarIcon className="w-5 h-5" />
-            <span>Reports</span>
-          </Link>
-        </nav>
-      </div>
+    <>
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      <button 
-        className="absolute top-4 left-4 md:hidden"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {/* Hamburger Icon */}
-        <div className="w-8 h-8 flex flex-col justify-between items-center">
-          <span className="block h-1 w-6 bg-gray-800"></span>
-          <span className="block h-1 w-6 bg-gray-800"></span>
-          <span className="block h-1 w-6 bg-gray-800"></span>
+      <div className={sidebarClasses}>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600 text-2xl">📚</span>
+              <h1 className="text-xl font-bold">EduTrack</h1>
+            </div>
+            <button 
+              onClick={onClose}
+              className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <nav className="space-y-2">
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg transition-colors"
+              onClick={() => onClose()}
+            >
+              <Home className="w-5 h-5" />
+              <span>Dashboard</span>
+            </Link>
+            
+            <Link 
+              to="/students" 
+              className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg transition-colors"
+              onClick={() => onClose()}
+            >
+              <Users className="w-5 h-5" />
+              <span>Students</span>
+            </Link>
+            
+            <Link 
+              to="/reports" 
+              className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg transition-colors"
+              onClick={() => onClose()}
+            >
+              <FileBarChart className="w-5 h-5" />
+              <span>Reports</span>
+            </Link>
+          </nav>
         </div>
-      </button>
-    </div>
+      </div>
+    </>
   );
 }

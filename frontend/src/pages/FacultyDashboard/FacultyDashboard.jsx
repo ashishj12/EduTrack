@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import RecentRecords from '../../components/FacultyDasboard/Dashboard/RecentRecords';
 import TodayClasses from '../../components/FacultyDasboard/Dashboard/TodayClasses';
 import QuickActions from '../../components/FacultyDasboard/Dashboard/QuickActions';
 import Header from '../../components/FacultyDasboard/Layout/Header';
 import Sidebar from '../../components/FacultyDasboard/Layout/Sidebar';
 
-
 export default function Dashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const user = {
     name: 'Dr. Sarah Wilson',
     department: 'Computer Science Department',
@@ -14,13 +16,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Faculty Dashboard" user={user} />
-      <main className="ml-64 p-6">
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Header title="Faculty Dashboard" user={user} onMenuClick={() => setIsSidebarOpen(true)} />
+      <main className="pt-16 md:pt-20 md:ml-64 p-4 md:p-6">
         <QuickActions />
         <TodayClasses />
         <RecentRecords />
-        <Sidebar />
-      </main> 
+      </main>
     </div>
   );
 }

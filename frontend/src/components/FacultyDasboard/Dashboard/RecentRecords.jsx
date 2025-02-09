@@ -1,4 +1,4 @@
-import { EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Eye, Pencil, Trash } from 'lucide-react';
 
 export default function RecentRecords() {
   const records = [
@@ -41,40 +41,40 @@ export default function RecentRecords() {
   ];
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">Recent Attendance Records</h2>
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
+    <div className="mt-6 md:mt-8">
+      <h2 className="text-lg md:text-xl font-semibold mb-4">Recent Attendance Records</h2>
+      <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[800px]">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Present</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Absent</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Present</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Absent</th>
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-200">
             {records.map(record => (
-              <tr key={record.id}>
-                <td className="px-6 py-4">{record.class}</td>
-                <td className="px-6 py-4">{record.date}</td>
-                <td className="px-6 py-4">{record.time}</td>
-                <td className="px-6 py-4">{record.total}</td>
-                <td className="px-6 py-4">{record.present}</td>
-                <td className="px-6 py-4">{record.absent}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                      <EyeIcon className="w-5 h-5" />
+              <tr key={record.id} className="hover:bg-gray-50">
+                <td className="px-4 md:px-6 py-4 text-sm">{record.class}</td>
+                <td className="px-4 md:px-6 py-4 text-sm">{record.date}</td>
+                <td className="px-4 md:px-6 py-4 text-sm">{record.time}</td>
+                <td className="px-4 md:px-6 py-4 text-sm">{record.total}</td>
+                <td className="px-4 md:px-6 py-4 text-sm text-green-600">{record.present}</td>
+                <td className="px-4 md:px-6 py-4 text-sm text-red-600">{record.absent}</td>
+                <td className="px-4 md:px-6 py-4">
+                  <div className="flex gap-2">
+                    <button className="p-1 text-gray-600 hover:text-blue-600 transition-colors">
+                      <Eye className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                      <PencilIcon className="w-5 h-5" />
+                    <button className="p-1 text-gray-600 hover:text-green-600 transition-colors">
+                      <Pencil className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
-                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                      <TrashIcon className="w-5 h-5" />
+                    <button className="p-1 text-gray-600 hover:text-red-600 transition-colors">
+                      <Trash className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                   </div>
                 </td>
