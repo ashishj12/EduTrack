@@ -22,4 +22,10 @@
   .font-sans {
     font-family: 'Inter', sans-serif;
   }
+
+  /* Blur effect for modal background */
+  .bg-modal-blur {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+  }
 }
