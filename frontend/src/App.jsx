@@ -7,6 +7,7 @@ import About from "./pages/HomePage/About";
 import Login from "./pages/HomePage/Login";
 import StudentDashboard from "./pages/StudentDashboard/StudentDashboard";
 import Layout from "./components/common/Layout";
+import FacultyDashboard from "./pages/FacultyDashboard/FacultyDashboard";
 const App = () => {
   return (
     <Router>
@@ -20,6 +21,7 @@ const App = () => {
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
             <Route path="/login/:loginType" element={<Login />} />{" "}
             <Route path="/studentdashboard" element={<StudentDashboard />} />
+            <Route path="/facultydashboard" element={<FacultyDashboard />} />
             {/* Route for login */}
           </Routes>
         </main>
