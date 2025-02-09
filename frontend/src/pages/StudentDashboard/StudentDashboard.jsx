@@ -65,8 +65,8 @@ const StudentDashboard = () => {
                 >
                   <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
                   <div>
-                    <div className="font-medium">John Smith</div>
-                    <div className="text-sm text-gray-600">CSE · Semester 6</div>
+                    <div className="font-medium">Ashish Kumar</div>
+                    <div className="text-sm text-gray-600">CSE · Semester 8</div>
                   </div>
                 </div>
                 {isProfileDropdownOpen && (

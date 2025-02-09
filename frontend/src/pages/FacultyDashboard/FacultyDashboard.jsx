@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const user = {
-    name: 'Dr. Sarah Wilson',
+    name: 'Dr. Shrinath Tailor',
     department: 'Computer Science Department',
     avatar: 'https://ui-avatars.com/api/?name=Sarah+Wilson'
   };

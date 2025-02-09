@@ -22,7 +22,7 @@ const Contact = () => {
       phone: "+91 8690869917",
     },
     {
-      name: "Tanish Saini",
+      name: "Tanishk Saini",
       role: "Backend and Frontend Developer",
       email: "sbcet@edutrack.com",
       phone: "+91 9782150028",
