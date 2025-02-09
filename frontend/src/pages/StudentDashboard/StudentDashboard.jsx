@@ -1,12 +1,12 @@
 import React, { useState } from "react"
 import { Bell, Download, LogOut, User } from "lucide-react"
 import html2pdf from "html2pdf.js"
-import AttendanceCard from "../components/StudentDashboard/AttendanceCard"
-import Calendar from "../components/StudentDashboard/Calendar"
-import CorrectionRequestModal from "../components/StudentDashboard/CorrectionRequestModal"
-import NotificationBar from "../components/StudentDashboard/NotificationBar"
-import RecentClassCard from "../components/StudentDashboard/RecentClassCard"
-import ScheduleCard from "../components/StudentDashboard/ScheduleCard"
+import AttendanceCard from "../../components/StudentDashboard/AttendanceCard"
+import Calendar from "../../components/StudentDashboard/Calendar"
+import CorrectionRequestModal from "../../components/StudentDashboard/CorrectionRequestModal"
+import ScheduleCard from "../../components/StudentDashboard/ScheduleCard"
+import RecentClassCard from "../../components/StudentDashboard/RecentClassCard"
+import NotificationBar from "../../components/StudentDashboard/NotificationBar"
 
 const StudentDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

@@ -5,7 +5,7 @@ import Features from "./components/HomePage/Features";
 import Contact from "./pages/HomePage/Contact";
 import About from "./pages/HomePage/About";
 import Login from "./pages/HomePage/Login";
-import StudentDashboard from "./pages/StudentDashboard";
+import StudentDashboard from "./pages/StudentDashboard/StudentDashboard";
 import Layout from "./components/common/Layout";
 const App = () => {
   return (
