@@ -23,8 +23,8 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="p-4">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2">
-              <span className="text-blue-600 text-2xl">📚</span>
-              <h1 className="text-xl font-bold">EduTrack</h1>
+              {/* <span className="text-blue-600 text-2xl"></span> */}
+              <h1 className="px-2 py-2 text-3xl font-bold text-primary">EduTrack</h1>
             </div>
             <button 
               onClick={onClose}
@@ -43,15 +43,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <Home className="w-5 h-5" />
               <span>Dashboard</span>
             </Link>
-            
-            <Link 
-              to="/students" 
-              className="flex items-center gap-2 p-2 text-gray-600 hover:bg-blue-50 rounded-lg transition-colors"
-              onClick={() => onClose()}
-            >
-              <Users className="w-5 h-5" />
-              <span>Students</span>
-            </Link>
+          
             
             <Link 
               to="/reports" 
