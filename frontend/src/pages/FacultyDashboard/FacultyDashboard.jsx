@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import RecentRecords from '../../components/FacultyDasboard/Dashboard/RecentRecords';
-import TodayClasses from '../../components/FacultyDasboard/Dashboard/TodayClasses';
-import QuickActions from '../../components/FacultyDasboard/Dashboard/QuickActions';
-import Header from '../../components/FacultyDasboard/Layout/Header';
-import Sidebar from '../../components/FacultyDasboard/Layout/Sidebar';
+import { useState, lazy, Suspense } from 'react';
+const RecentRecords = lazy(() => import('../../components/FacultyDasboard/Dashboard/RecentRecords'));
+const TodayClasses = lazy(() => import('../../components/FacultyDasboard/Dashboard/TodayClasses'));
+const QuickActions = lazy(() => import('../../components/FacultyDasboard/Dashboard/QuickActions'));
+const Header = lazy(() => import('../../components/FacultyDasboard/Layout/Header'));
+const Sidebar = lazy(() => import('../../components/FacultyDasboard/Layout/Sidebar'));
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -16,13 +16,15 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <Header title="Faculty Dashboard" user={user} onMenuClick={() => setIsSidebarOpen(true)} />
-      <main className="pt-16 md:pt-20 md:ml-64 p-4 md:p-6">
-        <QuickActions />
-        <TodayClasses />
-        <RecentRecords />
-      </main>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <Header title="Faculty Dashboard" user={user} onMenuClick={() => setIsSidebarOpen(true)} />
+        <main className="pt-16 md:pt-20 md:ml-64 p-4 md:p-6">
+          <QuickActions />
+          <TodayClasses />
+          <RecentRecords />
+        </main>
+      </Suspense>
     </div>
   );
 }

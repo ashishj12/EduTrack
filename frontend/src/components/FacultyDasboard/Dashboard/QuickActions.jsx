@@ -1,6 +1,6 @@
 import { Camera, Eye, GraduationCap } from 'lucide-react';
-import { FileUpload } from '../../common/File-Upload';
-import { useState } from 'react';
+import { lazy, useState } from 'react';
+const FileUpload = lazy(() => import('../../common/File-Upload'));
 
 export default function QuickActions() {
   const [fileUpload, setFileUpload] = useState(false);

@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from "lucide-react";
-import { CheckCircle2, Clock, ShieldCheck } from 'lucide-react';  // Importing icons for Features
+import { ChevronRight } from 'lucide-react';
+import { CheckCircle2, Clock, ShieldCheck } from 'lucide-react'; 
 
 const Home = () => {
-  const navigate = useNavigate(); // React Router hook for navigation
+  const navigate = useNavigate(); 
 
-  const handleLoginClick = (type) => {
-    navigate(`/login/${type}`); // Navigate to the login page with login type
-  };
+  const handleLoginClick = useCallback((type) => {
+    navigate(`/login/${type}`); 
+  }, [navigate]);
 
   const features = [
     {
@@ -31,7 +31,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="container mx-auto px-6 sm:px-12 py-16 flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-12">
-        {/* Left Column - Heading, Description, and Login Buttons */}
         <div className="w-full md:w-1/2 space-y-6">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-800 leading-tight">
             Revolutionize Your Attendance System with Image-Based Recognition
@@ -65,7 +64,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Features Section */}
       <div className="bg-gray-50 py-16">
         <div className="container mx-auto px-6 sm:px-12 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-6">
@@ -74,9 +72,7 @@ const Home = () => {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="p-6 bg-white shadow-lg rounded-lg space-y-4">
-                <div className="flex justify-center">
-                  {feature.icon}
-                </div>
+                <div className="flex justify-center">{feature.icon}</div>
                 <h3 className="text-xl font-semibold text-gray-800">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
