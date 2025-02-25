@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 // Lazy load components to optimize loading times
 const Home = lazy(() => import("./pages/HomePage/Home"));
 const Features = lazy(() => import("./components/HomePage/Features"));
-const Contact = lazy(() => import("./pages/HomePage/Contact"))
+const Contact = lazy(() => import("./pages/HomePage/Contact"));
 const About = lazy(() => import("./pages/HomePage/About"));
 const Login = lazy(() => import("./pages/HomePage/Login"));
 const StudentDashboard = lazy(() => import("./pages/StudentDashboard/StudentDashboard"));
