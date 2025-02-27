@@ -4,7 +4,6 @@ const TodayClasses = lazy(() => import('../../components/FacultyDasboard/Dashboa
 const QuickActions = lazy(() => import('../../components/FacultyDasboard/Dashboard/QuickActions'));
 const Header = lazy(() => import('../../components/FacultyDasboard/Layout/Header'));
 const Sidebar = lazy(() => import('../../components/FacultyDasboard/Layout/Sidebar'));
-
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 

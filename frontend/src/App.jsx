@@ -10,14 +10,13 @@ const Login = lazy(() => import("./pages/HomePage/Login"));
 const StudentDashboard = lazy(() => import("./pages/StudentDashboard/StudentDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/FacultyDashboard/FacultyDashboard"));
 const Layout = lazy(() => import("./components/common/Layout"));
-
 const App = () => {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
         {/* Layout container for pages */}
         <main className="flex-grow">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense>
             <Routes>
               <Route path="/" element={<Layout><Home /></Layout>} />
               <Route path="/features" element={<Layout><Features /></Layout>} />
