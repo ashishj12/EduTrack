@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/authContext";
+import getBaseUrl from "../../utils/baseUrl";
 import axios from "axios";
-import getBaseUrl from "../../utils/baseUrl"; // Adjust path as needed
 
 const Login = () => {
   const { loginType } = useParams();
-  const [currentLoginType, setCurrentLoginType] = useState(
-    loginType || "student"
-  );
+  const [currentLoginType, setCurrentLoginType] = useState("Student");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const { login } = useAuth(); // Use the login function from context
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,51 +25,61 @@ const Login = () => {
       e.preventDefault();
       setError("");
       setLoading(true);
-      
+
       try {
-        if (currentLoginType === "student") {
-          const response = await axios.post(`${getBaseUrl()}/api/auth/login`, {
-            username,
-            password
-          });
-
-          console.log("Login successful:", response.data);
-          console.log("User role:", response.data.user.role); // Log the user role
-
-          // Store user data and tokens in localStorage
-          localStorage.setItem('accessToken', response.data.accessToken);
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-
-          // Check role and navigate accordingly
-          if (response.data.user.role === "Student") {
-            console.log("Redirecting to student dashboard...");
-            navigate('/studentdashboard');
-          } else {
-            console.log("Redirecting to faculty dashboard...");
-            navigate('/dashboard'); // Fallback or for other roles
-          }
+        if (currentLoginType === "Student") {
+          // Use the auth context login function instead of direct API call
+          const user = await login(username, password);
+          
+          console.log("Login successful:", user);
+          
+          // Add a small delay to ensure storage is complete
+          setTimeout(() => {
+            // Redirect based on user role
+            if (user.role === "Student") {
+              navigate("/studentdashboard");
+            } else if (user.role === "Faculty") {
+              navigate("/facultydashboard");
+            } else {
+              navigate("/"); // Fallback redirect
+            }
+          }, 100);
         } else if (currentLoginType === "faculty") {
-          setError("Faculty login is not implemented yet");
+          // Use the auth context login function
+          const user = await login(username, password);
+          
+          console.log("Login successful:", user);
+          
+          // Add a small delay to ensure storage is complete
+          setTimeout(() => {
+            if (user.role === "Faculty") {
+              navigate("/facultydashboard");
+            } else {
+              navigate("/"); // Fallback redirect
+            }
+          }, 100);
         }
       } catch (err) {
         console.error("Login error:", err);
         if (err.response) {
           console.log("Error data:", err.response.data);
           console.log("Error status:", err.response.status);
-          setError(err.response.data?.message || "Login failed. Please check your credentials.");
+          setError(
+            err.response?.data?.message ||
+              "Login failed. Please check your credentials."
+          );
         } else if (err.request) {
           console.log("Error request:", err.request);
           setError("No response from server. Please check your connection.");
         } else {
-          console.log('Error message:', err.message);
-          setError("An error occurred while trying to log in.");
+          console.log("Error message:", err.message);
+          setError(err.message || "An error occurred while trying to log in.");
         }
       } finally {
         setLoading(false);
       }
     },
-    [currentLoginType, username, password, navigate]
+    [currentLoginType, username, password, navigate, login]
   );
 
   const handleToggleLoginType = useCallback(
@@ -102,7 +111,7 @@ const Login = () => {
                 currentLoginType.slice(1)}
             </h1>
             <div className="flex justify-center space-x-4">
-              {["student", "faculty"].map((type) => (
+              {["Student", "faculty"].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleToggleLoginType(type)}
@@ -130,7 +139,7 @@ const Login = () => {
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                {currentLoginType === "student" ? "Student ID" : "Faculty ID"}
+                {currentLoginType === "Student" ? "Student ID" : "Faculty ID"}
               </label>
               <input
                 type="text"
@@ -138,7 +147,7 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder={`Enter your ${
-                  currentLoginType === "student" ? "Student ID" : "Faculty ID"
+                  currentLoginType === "Student" ? "Student ID" : "Faculty ID"
                 }`}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required

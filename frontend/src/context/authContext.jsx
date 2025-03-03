@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { loginUserApi, getCurrentUserApi } from "../services/authService"; // Use the updated authService
+import { loginUserApi, getCurrentUserApi } from "../services/authService";
 
 // Create the context
 const AuthContext = createContext();
@@ -19,21 +19,20 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("accessToken");
-
       if (token) {
         try {
           const userData = await getCurrentUserApi();
           setCurrentUser(userData.user);
         } catch (err) {
+          // Clear all auth data on error
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
           setError("Session expired. Please login again.");
         }
       }
-
       setLoading(false);
     };
-
     checkAuthStatus();
   }, []);
 
@@ -44,14 +43,15 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const data = await loginUserApi(username, password);
-
       // Store tokens in localStorage
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       setCurrentUser(data.user);
       setLoading(false);
       return data.user;
+      
     } catch (err) {
       setError(err.message || "Login failed");
       setLoading(false);
@@ -60,18 +60,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout function
-  // const logout = () => {
-  //   localStorage.removeItem("accessToken");
-  //   localStorage.removeItem("refreshToken");
-  //   setCurrentUser(null);
-  // };
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    setCurrentUser(null);
+  };
 
   const value = {
     currentUser,
     loading,
     error,
     login,
-    // logout,
+    logout,
     isAuthenticated: !!currentUser,
   };
 

@@ -40,7 +40,7 @@ const Home = () => {
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 mt-6">
             <button
-              onClick={() => handleLoginClick("student")}
+              onClick={() => handleLoginClick("Student")}
               className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center w-full sm:w-auto"
             >
               Student Login <ChevronRight className="ml-2" />

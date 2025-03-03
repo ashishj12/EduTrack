@@ -34,7 +34,6 @@ const App = () => {
                 <Route path="/features" element={<Layout><Features /></Layout>} />
                 <Route path="/about" element={<Layout><About /></Layout>} />
                 <Route path="/contact" element={<Layout><Contact /></Layout>} />
-                <Route path="/login" element={<Login />} />
                 <Route path="/login/:loginType" element={<Login />} />
                 
                 {/* Protected Routes */}

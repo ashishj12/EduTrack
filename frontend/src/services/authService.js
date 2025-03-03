@@ -1,13 +1,13 @@
-const API_URL = "http://localhost:5000/api";
+import getBaseUrl from "../utils/baseUrl";
+
+const API_URL = `${getBaseUrl()}/api`;
 
 // Helper function for handling API responses
 const handleResponse = async (response) => {
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.message || "Something went wrong");
   }
-
   return data;
 };
 
@@ -20,27 +20,12 @@ export const loginUserApi = async (username, password) => {
     },
     body: JSON.stringify({ username, password }),
   });
-
-  return handleResponse(response);
-};
-
-// Register user
-export const registerUserApi = async (username, password) => {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  });
-
   return handleResponse(response);
 };
 
 // Get current user
 export const getCurrentUserApi = async () => {
   const token = localStorage.getItem("accessToken");
-
   if (!token) {
     throw new Error("No authentication token");
   }
@@ -52,6 +37,5 @@ export const getCurrentUserApi = async () => {
       "Content-Type": "application/json",
     },
   });
-
   return handleResponse(response);
 };
