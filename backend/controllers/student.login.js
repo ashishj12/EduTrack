@@ -91,6 +91,7 @@ export const loginUser = async (req, res, next) => {
     next(error);
   }
 };
+
 // Get current user
 export const getCurrentUser = async (req, res, next) => {
   try {

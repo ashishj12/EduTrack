@@ -5,7 +5,6 @@ export const validateRegistration = (data) => {
   const schema = Joi.object({
     username: Joi.string().min(3).max(50).required(),
     password: Joi.string().min(6).required(),
-    email: Joi.string().email().optional(), // Make email optional, but validate if provided
   });
 
   return schema.validate(data);
