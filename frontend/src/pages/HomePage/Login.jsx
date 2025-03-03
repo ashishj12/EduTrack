@@ -26,29 +26,31 @@ const Login = () => {
       e.preventDefault();
       setError("");
       setLoading(true);
-
+      
       try {
         if (currentLoginType === "student") {
           const response = await axios.post(`${getBaseUrl()}/api/auth/login`, {
             username,
-            password,
+            password
           });
 
           console.log("Login successful:", response.data);
+          console.log("User role:", response.data.user.role); // Log the user role
 
           // Store user data and tokens in localStorage
-          localStorage.setItem("accessToken", response.data.accessToken);
-          localStorage.setItem("refreshToken", response.data.refreshToken);
-          localStorage.setItem("user", JSON.stringify(response.data.user));
+          localStorage.setItem('accessToken', response.data.accessToken);
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
 
-          // Redirect based on user role
+          // Check role and navigate accordingly
           if (response.data.user.role === "Student") {
-            navigate("/studentdashboard");
+            console.log("Redirecting to student dashboard...");
+            navigate('/studentdashboard');
           } else {
-            navigate("/"); // Fallback
+            console.log("Redirecting to faculty dashboard...");
+            navigate('/dashboard'); // Fallback or for other roles
           }
         } else if (currentLoginType === "faculty") {
-          // Faculty login would be implemented with a different endpoint
           setError("Faculty login is not implemented yet");
         }
       } catch (err) {
@@ -56,15 +58,12 @@ const Login = () => {
         if (err.response) {
           console.log("Error data:", err.response.data);
           console.log("Error status:", err.response.status);
-          setError(
-            err.response.data?.message ||
-              "Login failed. Please check your credentials."
-          );
+          setError(err.response.data?.message || "Login failed. Please check your credentials.");
         } else if (err.request) {
           console.log("Error request:", err.request);
           setError("No response from server. Please check your connection.");
         } else {
-          console.log("Error message:", err.message);
+          console.log('Error message:', err.message);
           setError("An error occurred while trying to log in.");
         }
       } finally {
