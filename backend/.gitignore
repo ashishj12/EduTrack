@@ -2,4 +2,4 @@
 combined.log
 error.log
 node_modules
-password.txt
+password.txt.env
