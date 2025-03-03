@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import getBaseUrl from "../../utils/baseUrl"; // Adjust path as needed
 
 const Login = () => {
   const { loginType } = useParams();
   const [currentLoginType, setCurrentLoginType] = useState(
     loginType || "student"
   );
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -18,12 +22,56 @@ const Login = () => {
   }, [loginType]);
 
   const handleLogin = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
-      console.log(`${currentLoginType} logged in with email: ${email}`);
-      // Authentication logic should go here
+      setError("");
+      setLoading(true);
+
+      try {
+        if (currentLoginType === "student") {
+          const response = await axios.post(`${getBaseUrl()}/api/auth/login`, {
+            username,
+            password,
+          });
+
+          console.log("Login successful:", response.data);
+
+          // Store user data and tokens in localStorage
+          localStorage.setItem("accessToken", response.data.accessToken);
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+
+          // Redirect based on user role
+          if (response.data.user.role === "Student") {
+            navigate("/studentdashboard");
+          } else {
+            navigate("/"); // Fallback
+          }
+        } else if (currentLoginType === "faculty") {
+          // Faculty login would be implemented with a different endpoint
+          setError("Faculty login is not implemented yet");
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        if (err.response) {
+          console.log("Error data:", err.response.data);
+          console.log("Error status:", err.response.status);
+          setError(
+            err.response.data?.message ||
+              "Login failed. Please check your credentials."
+          );
+        } else if (err.request) {
+          console.log("Error request:", err.request);
+          setError("No response from server. Please check your connection.");
+        } else {
+          console.log("Error message:", err.message);
+          setError("An error occurred while trying to log in.");
+        }
+      } finally {
+        setLoading(false);
+      }
     },
-    [currentLoginType, email]
+    [currentLoginType, username, password, navigate]
   );
 
   const handleToggleLoginType = useCallback(
@@ -40,7 +88,7 @@ const Login = () => {
         {/* Left Section - Image */}
         <div className="relative">
           <img
-            src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg?t=st=1738773901~exp=1738777501~hmac=decb05aa76af5cbdf8880e1c49ec1d1717efc7f7767f3ff3bc0c96dc8cdea8d6&w=740" // Replace with your valid image URL
+            src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg?t=st=1738773901~exp=1738777501~hmac=decb05aa76af5cbdf8880e1c49ec1d1717efc7f7767f3ff3bc0c96dc8cdea8d6&w=740"
             alt="Login Illustration"
             className="w-full h-full object-cover"
           />
@@ -71,25 +119,31 @@ const Login = () => {
             </div>
           </div>
 
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
                 {currentLoginType === "student" ? "Student ID" : "Faculty ID"}
               </label>
               <input
                 type="text"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 placeholder={`Enter your ${
                   currentLoginType === "student" ? "Student ID" : "Faculty ID"
                 }`}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-                aria-label="Email or ID"
+                aria-label="Username or ID"
               />
             </div>
 
@@ -115,8 +169,9 @@ const Login = () => {
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              disabled={loading}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <div className="text-center text-sm text-gray-600 mt-4">
