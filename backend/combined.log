@@ -1,0 +1,104 @@
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T14:48:00.997Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T14:48:01.757Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T14:50:37.774Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T14:50:38.488Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T14:53:34.587Z"}
+{"0":"\"","1":"u","10":" ","11":"i","12":"s","13":" ","14":"n","15":"o","16":"t","17":" ","18":"a","19":"l","2":"s","20":"l","21":"o","22":"w","23":"e","24":"d","25":" ","26":"t","27":"o","28":" ","29":"b","3":"e","30":"e","31":" ","32":"e","33":"m","34":"p","35":"t","36":"y","4":"r","5":"n","6":"a","7":"m","8":"e","9":"\"","level":"warn","message":"Validation Error","timestamp":"2025-03-02T14:53:34.603Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T14:53:43.725Z"}
+{"0":"\"","1":"u","10":" ","11":"i","12":"s","13":" ","14":"n","15":"o","16":"t","17":" ","18":"a","19":"l","2":"s","20":"l","21":"o","22":"w","23":"e","24":"d","25":" ","26":"t","27":"o","28":" ","29":"b","3":"e","30":"e","31":" ","32":"e","33":"m","34":"p","35":"t","36":"y","4":"r","5":"n","6":"a","7":"m","8":"e","9":"\"","level":"warn","message":"Validation Error","timestamp":"2025-03-02T14:53:43.727Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T14:53:53.153Z"}
+{"0":"\"","1":"p","10":" ","11":"i","12":"s","13":" ","14":"n","15":"o","16":"t","17":" ","18":"a","19":"l","2":"a","20":"l","21":"o","22":"w","23":"e","24":"d","25":" ","26":"t","27":"o","28":" ","29":"b","3":"s","30":"e","31":" ","32":"e","33":"m","34":"p","35":"t","36":"y","4":"s","5":"w","6":"o","7":"r","8":"d","9":"\"","level":"warn","message":"Validation Error","timestamp":"2025-03-02T14:53:53.157Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T14:54:10.300Z"}
+{"buffer":{"data":[103,196,113,18,48,187,163,79,169,12,52,225],"type":"Buffer"},"level":"info","message":"User saved successfully","timestamp":"2025-03-02T14:54:10.529Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T14:54:10.584Z"}
+{"level":"info","message":"Login endpoint hit...","timestamp":"2025-03-02T14:55:37.894Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T14:55:38.085Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T14:55:38.086Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:51:26.962Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:51:27.731Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:51:30.188Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:51:30.809Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:52:57.275Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:52:59.009Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:52:59.588Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:53:03.213Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:53:04.067Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:53:40.021Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:53:40.622Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:53:52.503Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:53:53.347Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:53:55.640Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:53:57.437Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T16:54:04.047Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T16:54:06.509Z"}
+{"level":"info","message":"Login endpoint hit...","timestamp":"2025-03-02T17:19:44.025Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:19:44.355Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:19:44.356Z"}
+{"level":"info","message":"Login endpoint hit...","timestamp":"2025-03-02T17:20:14.372Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:20:14.568Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:20:14.569Z"}
+{"level":"info","message":"Login endpoint hit...","timestamp":"2025-03-02T17:20:15.790Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:20:15.983Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:20:15.983Z"}
+{"level":"info","message":"Login endpoint hit...","timestamp":"2025-03-02T17:20:16.598Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:20:16.803Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:20:16.804Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:20:43.266Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:20:43.988Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T17:21:15.799Z"}
+{"code":11000,"errorLabelSet":{},"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","index":0,"keyPattern":{"email":1},"keyValue":{"email":null}},"index":0,"keyPattern":{"email":1},"keyValue":{"email":null},"level":"error","message":"Registration error occurred! E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }\n    at InsertOneOperation.execute (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async tryOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:207:20)\n    at async executeOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:75:16)\n    at async Collection.insertOne (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/collection.js:157:16)","timestamp":"2025-03-02T17:21:16.039Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T17:22:06.786Z"}
+{"code":11000,"errorLabelSet":{},"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","index":0,"keyPattern":{"email":1},"keyValue":{"email":null}},"index":0,"keyPattern":{"email":1},"keyValue":{"email":null},"level":"error","message":"Registration error occurred! E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }\n    at InsertOneOperation.execute (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async tryOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:207:20)\n    at async executeOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:75:16)\n    at async Collection.insertOne (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/collection.js:157:16)","timestamp":"2025-03-02T17:22:06.983Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:31:13.574Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:31:15.047Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:31:19.641Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:31:20.458Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:31:24.596Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:31:25.361Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:31:29.026Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:31:29.719Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:31:49.929Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:31:50.544Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:32:20.049Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:32:20.867Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:32:44.699Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:32:45.376Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-02T17:32:56.960Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-02T17:32:57.542Z"}
+{"level":"info","message":"Registration endpoint hit","timestamp":"2025-03-02T17:33:31.466Z"}
+{"buffer":{"data":[103,196,150,107,211,235,239,92,71,174,192,3],"type":"Buffer"},"level":"info","message":"User saved successfully","timestamp":"2025-03-02T17:33:31.709Z"}
+{"level":"info","message":"Tokens generated for user: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-02T17:33:31.760Z"}
+{"level":"info","message":"Login endpoint hit","timestamp":"2025-03-02T17:33:56.625Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:33:56.826Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-02T17:33:56.826Z"}
+{"level":"info","message":"Login endpoint hit","timestamp":"2025-03-02T17:34:50.753Z"}
+{"level":"info","message":"Tokens generated for user: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-02T17:34:50.948Z"}
+{"level":"info","message":"User logged in: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-02T17:34:50.949Z"}
+{"level":"error","message":"Get current user error: read ECONNRESET","timestamp":"2025-03-03T01:25:55.218Z"}
+{"level":"error","message":"Error: read ECONNRESET","stack":"Error: read ECONNRESET\n    at TLSWrap.onStreamRead (node:internal/stream_base_commons:217:20)","timestamp":"2025-03-03T01:25:55.221Z"}
+{"level":"warn","message":"Authentication failed: jwt expired","timestamp":"2025-03-03T01:25:55.238Z"}
+{"level":"warn","message":"Authentication failed: jwt expired","timestamp":"2025-03-03T01:25:55.266Z"}
+{"level":"warn","message":"Authentication failed: jwt expired","timestamp":"2025-03-03T01:25:55.295Z"}
+{"level":"info","message":"Login endpoint hit","timestamp":"2025-03-03T01:27:56.207Z"}
+{"level":"info","message":"Tokens generated for user: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-03T01:27:56.869Z"}
+{"level":"info","message":"User logged in: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-03T01:27:56.870Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T01:33:24.976Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T01:33:25.876Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T01:33:28.186Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T01:33:28.996Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T01:39:00.596Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T01:39:01.555Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T01:39:10.639Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T01:39:10.640Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T01:47:57.137Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T01:47:57.138Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T01:49:15.144Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T01:49:15.144Z"}
+{"level":"error","message":"Get current user error: read ECONNRESET","timestamp":"2025-03-03T02:06:00.588Z"}
+{"level":"error","message":"Error: read ECONNRESET","stack":"Error: read ECONNRESET\n    at TLSWrap.onStreamRead (node:internal/stream_base_commons:217:20)","timestamp":"2025-03-03T02:06:00.594Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:08:57.335Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:08:57.337Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:09:37.990Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:09:37.991Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:10:45.651Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:10:46.519Z"}
