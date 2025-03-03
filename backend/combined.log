@@ -102,3 +102,60 @@
 {"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:09:37.991Z"}
 {"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:10:45.651Z"}
 {"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:10:46.519Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:12:43.326Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:12:44.213Z"}
+{"level":"error","message":"Registration error: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","timestamp":"2025-03-03T02:13:19.769Z"}
+{"level":"error","message":"Error: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }\n    at InsertOneOperation.execute (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async tryOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:207:20)\n    at async executeOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:75:16)\n    at async Collection.insertOne (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/collection.js:157:16)","timestamp":"2025-03-03T02:13:19.771Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:25:44.318Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:25:45.246Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:25:57.717Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:25:58.533Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:26:22.625Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:26:23.356Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:26:29.412Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:26:30.129Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:26:48.461Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:26:49.383Z"}
+{"level":"info","message":"Login endpoint hit...","timestamp":"2025-03-03T02:26:58.025Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:26:58.332Z"}
+{"level":"info","message":"User logged in: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:26:58.333Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:27:24.692Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:27:25.487Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:27:40.271Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:27:40.272Z"}
+{"level":"error","message":"Registration error: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","timestamp":"2025-03-03T02:27:50.183Z"}
+{"level":"error","message":"Error: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }\n    at InsertOneOperation.execute (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async tryOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:207:20)\n    at async executeOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:75:16)\n    at async Collection.insertOne (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/collection.js:157:16)","timestamp":"2025-03-03T02:27:50.185Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:29:27.726Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:29:28.622Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:29:53.604Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:29:54.358Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:30:02.040Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:30:03.938Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:30:04.757Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:30:16.309Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:30:18.334Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:30:19.081Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:31:05.204Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:31:06.109Z"}
+{"level":"error","message":"Registration error: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","timestamp":"2025-03-03T02:31:10.129Z"}
+{"level":"error","message":"Error: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }","stack":"MongoServerError: E11000 duplicate key error collection: test.students index: email_1 dup key: { email: null }\n    at InsertOneOperation.execute (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async tryOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:207:20)\n    at async executeOperation (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/operations/execute_operation.js:75:16)\n    at async Collection.insertOne (/home/ashish/Documents/Projects/EduTrack/backend/node_modules/mongodb/lib/collection.js:157:16)","timestamp":"2025-03-03T02:31:10.134Z"}
+{"level":"info","message":"Tokens generated for user: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-03T02:31:36.113Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs007","timestamp":"2025-03-03T02:31:36.115Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:32:19.353Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:32:20.214Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:32:42.916Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:32:43.632Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-03-03T02:32:52.780Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-03-03T02:32:53.530Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:34:12.016Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:34:12.017Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:35:13.138Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:35:13.139Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:36:37.763Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:36:37.764Z"}
+{"level":"info","message":"Tokens generated for user: 67c4711230bba34fa90c34e1","timestamp":"2025-03-03T02:37:01.098Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs006","timestamp":"2025-03-03T02:37:01.098Z"}
+{"level":"info","message":"Tokens generated for user: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-03T02:37:33.471Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs007","timestamp":"2025-03-03T02:37:33.472Z"}
+{"level":"info","message":"Tokens generated for user: 67c4966bd3ebef5c47aec003","timestamp":"2025-03-03T02:41:26.666Z"}
+{"level":"info","message":"Student logged in successfully: 21esbcs007","timestamp":"2025-03-03T02:41:26.667Z"}

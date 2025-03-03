@@ -1,2 +1,5 @@
 node_modules
 password.txt
+combined.log
+error.log
+.env
