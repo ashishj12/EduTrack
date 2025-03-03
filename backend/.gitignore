@@ -1,5 +1,5 @@
-node_modules
-password.txt
+.env
 combined.log
 error.log
-.env
+node_modules
+password.txt
