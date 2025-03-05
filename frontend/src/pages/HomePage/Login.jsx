@@ -37,9 +37,9 @@ const Login = () => {
           setTimeout(() => {
             // Redirect based on user role
             if (user.role === "Student") {
-              navigate("/studentdashboard");
+              navigate("/student-dashboard");
             } else if (user.role === "Faculty") {
-              navigate("/facultydashboard");
+              navigate("/faculty-dashboard");
             } else {
               navigate("/"); // Fallback redirect
             }
@@ -53,7 +53,7 @@ const Login = () => {
           // Add a small delay to ensure storage is complete
           setTimeout(() => {
             if (user.role === "Faculty") {
-              navigate("/facultydashboard");
+              navigate("/faculty-dashboard");
             } else {
               navigate("/"); // Fallback redirect
             }
