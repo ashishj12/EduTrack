@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
-import getBaseUrl from "../../utils/baseUrl";
-import axios from "axios";
 
 const Login = () => {
   const { loginType } = useParams();
@@ -11,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth(); // Use the login function from context
+  const { login, loginFaculty } = useAuth(); // Use the login function from context
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,59 +25,35 @@ const Login = () => {
       setLoading(true);
 
       try {
-        if (currentLoginType === "Student") {
-          // Use the auth context login function instead of direct API call
-          const user = await login(username, password);
-          
-          console.log("Login successful:", user);
-          
-          // Add a small delay to ensure storage is complete
-          setTimeout(() => {
-            // Redirect based on user role
-            if (user.role === "Student") {
-              navigate("/student-dashboard");
-            } else if (user.role === "Faculty") {
-              navigate("/faculty-dashboard");
-            } else {
-              navigate("/"); // Fallback redirect
-            }
-          }, 100);
-        } else if (currentLoginType === "faculty") {
-          // Use the auth context login function
-          const user = await login(username, password);
-          
-          console.log("Login successful:", user);
-          
-          // Add a small delay to ensure storage is complete
-          setTimeout(() => {
-            if (user.role === "Faculty") {
-              navigate("/faculty-dashboard");
-            } else {
-              navigate("/"); // Fallback redirect
-            }
-          }, 100);
+        // Perform login based on currentLoginType
+        let user;
+        if (currentLoginType === "Faculty") {
+          user = await loginFaculty(username, password);
+        } else {
+          user = await login(username, password);
         }
+
+        console.log("Login successful:", user);
+
+        // Add a small delay to ensure storage is complete
+        setTimeout(() => {
+          // Redirect based on user role
+          if (user.role === "Student") {
+            navigate("/student-dashboard");
+          } else if (user.role === "Faculty") {
+            navigate("/faculty-dashboard");
+          } else {
+            navigate("/"); // Fallback redirect
+          }
+        }, 100);
       } catch (err) {
         console.error("Login error:", err);
-        if (err.response) {
-          console.log("Error data:", err.response.data);
-          console.log("Error status:", err.response.status);
-          setError(
-            err.response?.data?.message ||
-              "Login failed. Please check your credentials."
-          );
-        } else if (err.request) {
-          console.log("Error request:", err.request);
-          setError("No response from server. Please check your connection.");
-        } else {
-          console.log("Error message:", err.message);
-          setError(err.message || "An error occurred while trying to log in.");
-        }
+        setError(err.message || "Login failed. Please check your credentials.");
       } finally {
         setLoading(false);
       }
     },
-    [currentLoginType, username, password, navigate, login]
+    [username, password, navigate, login, loginFaculty, currentLoginType]
   );
 
   const handleToggleLoginType = useCallback(
@@ -111,7 +85,7 @@ const Login = () => {
                 currentLoginType.slice(1)}
             </h1>
             <div className="flex justify-center space-x-4">
-              {["Student", "faculty"].map((type) => (
+              {["Student", "Faculty"].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleToggleLoginType(type)}

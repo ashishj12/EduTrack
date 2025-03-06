@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { loginUserApi, getCurrentUserApi } from "../services/authService";
+import { loginUserApi, getCurrentUserApi, loginFacultyApi } from "../services/authService";
 
 // Create the context
 const AuthContext = createContext();
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  // Login function
+  // Login function for student
   const login = async (username, password) => {
     setLoading(true);
     setError(null);
@@ -51,7 +51,28 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(data.user);
       setLoading(false);
       return data.user;
-      
+    } catch (err) {
+      setError(err.message || "Login failed");
+      setLoading(false);
+      throw err;
+    }
+  };
+
+  // Login function for faculty
+  const loginFaculty = async (username, password) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await loginFacultyApi(username, password);
+      // Store tokens in localStorage
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setCurrentUser(data.user);
+      setLoading(false);
+      return data.user;
     } catch (err) {
       setError(err.message || "Login failed");
       setLoading(false);
@@ -72,6 +93,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    loginFaculty,
     logout,
     isAuthenticated: !!currentUser,
   };

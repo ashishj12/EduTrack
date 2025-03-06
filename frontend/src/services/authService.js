@@ -39,3 +39,34 @@ export const getCurrentUserApi = async () => {
   });
   return handleResponse(response);
 };
+
+// Login user
+export const loginFacultyApi = async (username, password) => {
+  const response = await fetch(`${API_URL}/auth/login-faculty`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+  return handleResponse(response);
+};
+
+
+
+// Get current user
+export const getCurrentFacultyApi = async () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(`${API_URL}/auth/faculty`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return handleResponse(response);
+};
