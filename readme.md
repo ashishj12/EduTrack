@@ -75,22 +75,29 @@ backend/
 ### Manual Setup
 
 ### Backend Setup
-- Navigate to the backend directory: `cd backend`
+- Navigate to the backend directory: 
+    `cd backend`
 
 - Create a .env file based on .env.sample: 
-    ``PORT=5000
-    MONGO_URI=your_mongodb_atlas_connection_string
+    `PORT=5000`
+
+    MONGO_URI=`your_mongodb_atlas_connection_string`
+    
     JWT_SECRET=your_jwt_secret
-    NODE_ENV=development``
+    `NODE_ENV=development`
+
 -  Start the Backend Server:
-    npm start
+    `npm run dev`
 
 ### Frontend Setup
 
--  Navigate to the frontend directory: `cd frontend`
--  Install dependencies : npm install
--  Start the development server
-    npm run dev
+-  Navigate to the frontend directory: 
+    `cd frontend`
+-  Install dependencies : 
+    ``npm install``
+-  Start the development server:
+
+    ```npm run dev```
 -  Access the application at http://localhost:5147
 
 ### 👤 Role-Based Access Control (RBAC)
@@ -124,6 +131,3 @@ Note: User credentials are pre-defined in MongoDB Atlas. There is no registratio
 **Lokendra Singh** - ML Developer
 **Uttam Kumar** - Data Analytics
 **Utkarsh Verma** - UI/UX Designer
-
-### 📄 License
-This project is licensed under the MIT License.
