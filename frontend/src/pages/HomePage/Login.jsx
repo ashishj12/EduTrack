@@ -4,7 +4,7 @@ import { useAuth } from "../../context/authContext";
 
 const Login = () => {
   const { loginType } = useParams();
-  const [currentLoginType, setCurrentLoginType] = useState("Student");
+  const [currentLoginType, setCurrentLoginType] = useState("Student" && "Faculty");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

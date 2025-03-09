@@ -1,12 +1,12 @@
-import { Camera, Eye } from 'lucide-react';
-import { lazy, useState } from 'react';
-const FileUpload = lazy(() => import('../../common/File-Upload'));
+import { Camera, Eye, X } from 'lucide-react';
+import { useState } from 'react';
+import UploadImage from '../../../pages/FacultyDashboard/UploadImage';
 
 export default function QuickActions() {
   const [fileUpload, setFileUpload] = useState(false);
 
   const handleFileUpload = () => {
-    // Toggle the visibility of the file upload component
+    // Toggle the visibility of the file upload component and add background blur
     setFileUpload(!fileUpload);
   };
 
@@ -45,17 +45,20 @@ export default function QuickActions() {
         </div>
       </div>
 
-      {/* File Upload Overlay */}
+      {/* File Upload Overlay with Background Blur Effect */}
       {fileUpload && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-md">
-          <div className="relative w-full max-w-lg mx-4 p-8 bg-white dark:bg-neutral-900 rounded-lg shadow-lg">
-            <FileUpload onChange={(files) => console.log(files)} />
+        <div className="fixed inset-0 z-50 flex justify-center items-center  bg-opacity-50 backdrop-blur-sm transition-opacity duration-300">
+          <div className="relative w-full max-w-4xl mx-4 bg-white rounded-lg shadow-xl overflow-y-auto max-h-[90vh] animate-scale-in">
+            {/* Close Button */}
             <button
               onClick={handleFileUpload}
-              className="absolute top-2 right-2 text-white bg-red-600 p-2 rounded-full"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1 shadow-md z-10 transition-colors"
             >
-              X
+              <X className="w-5 h-5" />
             </button>
+            <div className="p-6">
+              <UploadImage />
+            </div>
           </div>
         </div>
       )}
