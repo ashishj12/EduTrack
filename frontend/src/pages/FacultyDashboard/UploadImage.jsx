@@ -136,10 +136,10 @@ const UploadImage = () => {
                 <option value="" disabled>
                   Choose a subject
                 </option>
-                <option value="math">Mathematics</option>
-                <option value="science">Science</option>
-                <option value="english">English</option>
-                <option value="history">History</option>
+                <option value="bda">Big Data Analytics</option>
+                <option value="dm">Disaster Management</option>
+                <option value="stv">STV</option>
+                <option value="project">Project</option>
               </select>
             </div>
 
@@ -174,9 +174,7 @@ const UploadImage = () => {
                 <option value="" disabled>
                   Select class/batch
                 </option>
-                <option value="class1">Class A</option>
-                <option value="class2">Class B</option>
-                <option value="class3">Class C</option>
+                <option value="2021">2021</option>
               </select>
             </div>
 
@@ -193,25 +191,12 @@ const UploadImage = () => {
                 <option value="" disabled>
                   Select semester
                 </option>
-                <option value="sem1">Semester 1</option>
-                <option value="sem2">Semester 2</option>
-                <option value="sem3">Semester 3</option>
+                <option value="sem8">Semester 8</option>
               </select>
             </div>
           </div>
 
-          {/* Additional Notes */}
-          <div>
-            <label htmlFor="notes" className="block text-gray-700 mb-2">
-              Additional Notes (Optional)
-            </label>
-            <textarea
-              id="notes"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter any additional information about this attendance session"
-            ></textarea>
-          </div>
-
+        
           {/* Form Actions */}
           <div className="mt-6 flex justify-end space-x-4">
             <button
