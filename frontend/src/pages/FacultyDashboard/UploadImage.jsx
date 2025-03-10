@@ -172,7 +172,7 @@ const UploadImage = () => {
                 defaultValue=""
               >
                 <option value="" disabled>
-                  Select class/batch
+                  Select batch
                 </option>
                 <option value="2021">2021</option>
               </select>
