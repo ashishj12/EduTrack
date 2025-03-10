@@ -12,7 +12,10 @@ export const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const { username, password } = value;
+    let { username, password } = value;
+
+    // Convert username to lowercase
+    username = username.toLowerCase();
 
     // Check if username already exists
     const existingUser = await Student.findOne({ username });
@@ -48,6 +51,7 @@ export const registerUser = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // Login student
 export const loginUser = async (req, res, next) => {
