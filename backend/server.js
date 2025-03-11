@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
+import fileUploadRoutes from "./routes/fileUploadRoutes.js";
 import logger from "./utils/logger.js";
 
 dotenv.config();
@@ -26,6 +27,7 @@ mongoose
 
 // Set up routes
 app.use("/api/auth", authRoutes);
+app.use("/api/upload", fileUploadRoutes); // Add this line
 
 // Error handler middleware should be after routes
 app.use(errorHandler);
