@@ -152,13 +152,13 @@
   }
   ```
 - **Request Body:**
-  - Form-data with a single file field named `file`
+  - Form-data with a single file field named `facultyFile`
 - **Response:**
   ```json
   {
     "message": "File uploaded successfully",
     "file": {
-      "fieldname": "file",
+      "fieldname": "facultyFile",
       "originalname": "original_filename",
       "encoding": "7bit",
       "mimetype": "file_mimetype",
