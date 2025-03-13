@@ -3,8 +3,12 @@ import Joi from "joi";
 // Validate registration input
 export const validateRegistration = (data) => {
   const schema = Joi.object({
-    username: Joi.string().min(3).max(50).required(),
-    password: Joi.string().min(6).required(),
+    username: Joi.string().required(),
+    password: Joi.string().required(),
+    name: Joi.string().required(),
+    branch: Joi.string().required(),
+    batch: Joi.string().required(),
+    semester: Joi.number().required(),
   });
 
   return schema.validate(data);

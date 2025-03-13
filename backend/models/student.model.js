@@ -19,6 +19,22 @@ const studentSchema = mongoose.Schema(
       default: "Student",
       required: true,
     },
+    name: {
+      type: String,
+      required: true,
+    },
+    branch: {
+      type: String,
+      required: true,
+    },
+    batch: {
+      type: String,
+      required: true,
+    },
+    semester: {
+      type: Number,
+      required: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

@@ -12,7 +12,7 @@ export const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    let { username, password } = value;
+    let { username, password, name, branch, batch, semester } = value;
 
     // Convert username to lowercase
     username = username.toLowerCase();
@@ -27,6 +27,10 @@ export const registerUser = async (req, res, next) => {
     const student = new Student({
       username,
       password,
+      name,
+      branch,
+      batch,
+      semester,
     });
 
     // Save student to database
@@ -43,6 +47,10 @@ export const registerUser = async (req, res, next) => {
         id: student._id,
         username: student.username,
         role: student.role,
+        name: student.name,
+        branch: student.branch,
+        batch: student.batch,
+        semester: student.semester,
       },
       ...tokens,
     });
@@ -87,6 +95,10 @@ export const loginUser = async (req, res, next) => {
         id: student._id,
         username: student.username,
         role: student.role,
+        name: student.name,
+        branch: student.branch,
+        batch: student.batch,
+        semester: student.semester,
       },
       ...tokens,
     });
