@@ -40,7 +40,7 @@ export const getCurrentUserApi = async () => {
   return handleResponse(response);
 };
 
-// Login user
+// Login faculty
 export const loginFacultyApi = async (username, password) => {
   const response = await fetch(`${API_URL}/auth/login-faculty`, {
     method: "POST",
@@ -51,8 +51,6 @@ export const loginFacultyApi = async (username, password) => {
   });
   return handleResponse(response);
 };
-
-
 
 // Get current user
 export const getCurrentFacultyApi = async () => {
@@ -70,3 +68,23 @@ export const getCurrentFacultyApi = async () => {
   });
   return handleResponse(response);
 };
+
+
+
+export const loginAdminApi = async (username, password, secretKey) => {
+  const response = await fetch(`${API_URL}/auth/admin-login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password, secretKey }), // Ensure secretKey is in the request body
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "An error occurred");
+  }
+
+  return response.json(); // Return the response JSON if successful
+};
+

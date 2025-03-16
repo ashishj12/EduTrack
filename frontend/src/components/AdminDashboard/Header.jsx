@@ -1,9 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate(); 
+
+  const handleLogout = () => {
+
+    // Clear user data from localStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    navigate("/admin"); 
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
@@ -11,7 +21,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo and Mobile Menu Toggle */}
           <div className="flex items-center justify-between w-full md:w-auto">
-            <Link to="/admindashboard" className="flex items-center">
+            <Link to="/admin-dashboard" className="flex items-center">
               <span className="text-2xl sm:text-3xl font-bold text-primary">EduTrack</span>
             </Link>
             
@@ -36,6 +46,7 @@ const Header = () => {
             <button 
               className="text-sm text-gray-700 hover:text-gray-900 flex items-center space-x-1 focus:outline-none focus:ring-2 focus:ring-gray-200 rounded-full p-1"
               aria-label="Logout"
+              onClick={handleLogout} // Add the logout handler here
             >
               <LogOut className="w-5 h-5" />
               <span className="hidden lg:inline">Logout</span>
@@ -54,9 +65,10 @@ const Header = () => {
                 <Bell className="w-5 h-5" />
                 <span>Notifications</span>
               </button>
-              <button 
-                className="w-full text-left flex items-center space-x-2 p-2 hover:bg-gray-100"
-                aria-label="Logout"
+              <button
+                onClick={handleLogout} // Add the logout handler here
+                className="w-full text-left flex items-center space-x-2 p-2 hover:bg-gray-100 cursor-pointer"
+                aria-label="Logout" 
               >
                 <LogOut className="w-5 h-5" />
                 <span>Logout</span>

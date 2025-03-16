@@ -1,5 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { loginUserApi, getCurrentUserApi, loginFacultyApi } from "../services/authService";
+import {
+  loginUserApi,
+  getCurrentUserApi,
+  loginFacultyApi,
+} from "../services/authService";
 
 // Create the context
 const AuthContext = createContext();
@@ -88,6 +92,28 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
+  //admin login function
+  const loginAdmin = async (username, password) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await loginAdmin(username, password);
+      // Store tokens in localStorage
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setCurrentUser(data.user);
+      setLoading(false);
+      return data.user;
+    } catch (err) {
+      setError(err.message || "Login failed");
+      setLoading(false);
+      throw err;
+    }
+  };
+
   const value = {
     currentUser,
     loading,
@@ -95,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     login,
     loginFaculty,
     logout,
+    loginAdmin,
     isAuthenticated: !!currentUser,
   };
 

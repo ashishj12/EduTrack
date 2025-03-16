@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react"
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom"
 import { AuthProvider } from "./context/authContext"
 import ProtectedRoute from "./services/ProtectedRoute"
+import AdminLogin from "./pages/AdminLogin/AdminLogin"
 
 // Fallback loading component
 const LoadingFallback = () => (
@@ -12,15 +13,11 @@ const LoadingFallback = () => (
 
 // Lazy load components to optimize loading times
 const Home = lazy(() => import("./pages/HomePage/Home"))
-const Features = lazy(() => import("./components/HomePage/Features"))
 const Contact = lazy(() => import("./pages/HomePage/Contact"))
-const About = lazy(() => import("./pages/HomePage/About"))
 const Login = lazy(() => import("./pages/HomePage/Login"))
 const StudentDashboard = lazy(() => import("./pages/StudentDashboard/StudentDashboard"))
 const FacultyDashboard = lazy(() => import("./pages/FacultyDashboard/FacultyDashboard"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard/Dashboard"))
-const Layout = lazy(() => import("./components/common/Layout"))
-
 const App = () => {
   return (
     <AuthProvider>
@@ -34,33 +31,17 @@ const App = () => {
                 <Route
                   path="/"
                   element={
-                    <Layout>
+                    // <Layout>
                       <Home />
-                    </Layout>
-                  }
-                />
-                <Route
-                  path="/features"
-                  element={
-                    <Layout>
-                      <Features />
-                    </Layout>
-                  }
-                />
-                <Route
-                  path="/about"
-                  element={
-                    <Layout>
-                      <About />
-                    </Layout>
+                    // </Layout>
                   }
                 />
                 <Route
                   path="/contact"
                   element={
-                    <Layout>
+                    // <Layout>
                       <Contact />
-                    </Layout>
+                    // {/* </Layout> */}
                   }
                 />
                 <Route path="/login/:loginType" element={<Login />} />
@@ -91,6 +72,7 @@ const App = () => {
                   }
                 />
 
+                  <Route path="/admin" element={<AdminLogin />} />
                 {/* Catch all route - redirect to home */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

@@ -85,7 +85,7 @@ const Login = () => {
                 currentLoginType.slice(1)}
             </h1>
             <div className="flex justify-center space-x-4">
-              {["Student", "Faculty"].map((type) => (
+              {["Student", "faculty"].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleToggleLoginType(type)}
