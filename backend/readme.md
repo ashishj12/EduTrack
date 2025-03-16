@@ -170,3 +170,52 @@
   }
   ```
 
+#### Register Admin
+- **URL:** `/api/auth/admin-register`
+- **Method:** `POST`
+- **Request Body:**
+  ```json
+  {
+    "username": "admin_username",
+    "password": "admin_password"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "message": "Registration successful",
+    "user": {
+      "id": "admin_id",
+      "username": "admin_username",
+      "secretKey": "secretKey"
+    },
+    "accessToken": "access_token",
+    "refreshToken": "refresh_token"
+  }
+  ```
+
+#### Login Admin
+- **URL:** `/api/auth/admin-login`
+- **Method:** `POST`
+- **Request Body:**
+
+  ```json
+  {
+    "username": "admin_username",
+    "password": "admin_password",
+    "secretKey": "secretKey"
+  }
+  ```
+
+- **Response:**
+  ```json
+  {
+    "message": "Login successful",
+    "user": {
+      "id": "admin_id",
+      "username": "admin_username",
+    },
+    "accessToken": "access_token",
+    "refreshToken": "refresh_token"
+  }
+  ```

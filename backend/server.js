@@ -6,6 +6,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
 import fileUploadRoutes from "./routes/fileUploadRoutes.js";
 import logger from "./utils/logger.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -26,7 +27,7 @@ mongoose
   .catch((e) => logger.error("MongoDB connection error:", e));
 
 // Set up routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes, adminRoutes);
 app.use("/api/upload", fileUploadRoutes); // Add this line
 
 // Error handler middleware should be after routes

@@ -32,3 +32,23 @@ export const validateFacultyLogin = (data) => {
 
   return schema.validate(data);
 };
+
+export const validateAdminRegister = (data) => {
+  const schema = Joi.object({
+    username: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+  });
+
+  return schema.validate(data);
+};
+
+
+export const validateAdminLogin = (data) => {
+  const schema = Joi.object({
+    username: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    secretKey: Joi.string().required()
+  });
+
+  return schema.validate(data);
+};
