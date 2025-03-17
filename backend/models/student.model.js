@@ -25,6 +25,7 @@ const studentSchema = mongoose.Schema(
     },
     branch: {
       type: String,
+      enum: ["EE", "CSE", "ME", "CE"],
       required: true,
     },
     batch: {
