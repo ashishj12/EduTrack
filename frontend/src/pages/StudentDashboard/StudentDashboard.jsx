@@ -5,8 +5,10 @@ import Calendar from "../../components/StudentDashboard/Calendar";
 import CorrectionRequestModal from "../../components/StudentDashboard/CorrectionRequestModal";
 import ScheduleCard from "../../components/StudentDashboard/ScheduleCard";
 import RecentClassCard from "../../components/StudentDashboard/RecentClassCard";
+import { useAuth } from "../../context/authContext";
 
 const StudentDashboard = () => {
+  const { currentUser } = useAuth(); // Access the currentUser from context
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
@@ -54,10 +56,10 @@ const StudentDashboard = () => {
 
   return (
     <>
-      <div className={`transition-all duration-300 ${isBlurred ? "filter blur-sm" : ""}`}>
+      <div className={isBlurred ? "filter blur-sm transition-all duration-300" : "transition-all duration-300"}>
         <div id="dashboard-content" className="p-3 sm:p-4 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Navbar section - Fixed alignment */}
+            {/* Navbar section */}
             <div className="flex flex-row justify-between items-center mb-6 sm:mb-8">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Attendance Overview</h1>
               <div className="relative profile-dropdown-container">
@@ -65,10 +67,14 @@ const StudentDashboard = () => {
                   className="flex items-center space-x-2 cursor-pointer bg-white p-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 >
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 text-white flex items-center justify-center rounded-full font-semibold text-sm sm:text-base">AK</div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 text-white flex items-center justify-center rounded-full font-semibold text-sm sm:text-base">
+                    {currentUser && currentUser.name ? currentUser.name[0] : "U"}
+                  </div>
                   <div className="hidden sm:block">
-                    <div className="font-medium text-sm sm:text-base">Ashish Kumar</div>
-                    <div className="text-xs sm:text-sm text-gray-600">CSE · Semester 8</div>
+                    <div className="font-medium text-sm sm:text-base">{currentUser?.name || "Unknown"}</div>
+                    <div className="text-xs sm:text-sm text-gray-600">
+                      {currentUser?.branch} · Semester {currentUser?.semester}
+                    </div>
                   </div>
                 </div>
                 {isProfileDropdownOpen && (
