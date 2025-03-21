@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+
 // Faculty Schema
 const facultySchema = mongoose.Schema(
   {
@@ -29,8 +30,9 @@ const facultySchema = mongoose.Schema(
     subjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subject'
-      }
+        ref: "Subject",
+        required:false,
+      },
     ],
     createdAt: {
       type: Date,

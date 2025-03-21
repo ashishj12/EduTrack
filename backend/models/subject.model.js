@@ -5,10 +5,6 @@ const subjectSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  subjectSub: {
-    type: String,
-    required: true
-  },
   subjectSem: {
     type: Number,
     required: true
@@ -20,8 +16,10 @@ const subjectSchema = new mongoose.Schema({
   taughtBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Faculty',
-    required: true
+    required: false
   }
+}, { timestamps: true 
+  
 });
 
 subjectSchema.methods.increaseTotalClasses = function() {

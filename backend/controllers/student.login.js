@@ -4,61 +4,7 @@ import { validateRegistration, validateLogin } from "../utils/validation.js";
 import logger from "../utils/logger.js";
 
 // Register a new student
-export const registerUser = async (req, res, next) => {
-  try {
-    // Validate request data
-    const { error, value } = validateRegistration(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
 
-    let { username, password, name, branch, batch, semester } = value;
-
-    // Convert username to lowercase
-    username = username.toLowerCase();
-
-    // Check if username already exists
-    const existingUser = await Student.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Username already exists" });
-    }
-
-    // Create new student
-    const student = new Student({
-      username,
-      password,
-      name,
-      branch,
-      batch,
-      semester,
-    });
-
-    // Save student to database
-    await student.save();
-    logger.info(`New student registered: ${username}`);
-
-    // Generate tokens
-    const tokens = await generateTokens(student);
-
-    // Return success response
-    return res.status(201).json({
-      message: "Registration successful",
-      user: {
-        id: student._id,
-        username: student.username,
-        role: student.role,
-        name: student.name,
-        branch: student.branch,
-        batch: student.batch,
-        semester: student.semester,
-      },
-      ...tokens,
-    });
-  } catch (error) {
-    logger.error(`Registration error: ${error.message}`);
-    next(error);
-  }
-};
 
 
 // Login student

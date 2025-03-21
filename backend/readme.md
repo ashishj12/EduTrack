@@ -5,13 +5,23 @@
 ### Student Routes
 
 #### Register Student
-- **URL:** `/api/auth/register`
+- **URL:** `/api/admin/register-student`
 - **Method:** `POST`
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer admin_access_token"
+  }
+  ```
 - **Request Body:**
   ```json
   {
     "username": "student_username",
-    "password": "student_password"
+    "password": "student_password",
+    "name": "student_name",
+    "branch": "student_branch",
+    "batch": "student_batch",
+    "semester": student_semester
   }
   ```
 - **Response:**
@@ -21,7 +31,11 @@
     "user": {
       "id": "student_id",
       "username": "student_username",
-      "role": "Student"
+      "role": "Student",
+      "name": "student_name",
+      "branch": "student_branch",
+      "batch": "student_batch",
+      "semester": student_semester
     },
     "accessToken": "access_token",
     "refreshToken": "refresh_token"
@@ -75,13 +89,21 @@
 ### Faculty Routes
 
 #### Register Faculty
-- **URL:** `/api/auth/register-faculty`
+- **URL:** `/api/admin/register-faculty`
 - **Method:** `POST`
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer admin_access_token"
+  }
+  ```
 - **Request Body:**
   ```json
   {
     "username": "faculty_username",
-    "password": "faculty_password"
+    "password": "faculty_password",
+    "name": "faculty_name",
+    "department": "faculty_department"
   }
   ```
 - **Response:**
@@ -91,7 +113,9 @@
     "user": {
       "id": "faculty_id",
       "username": "faculty_username",
-      "role": "Faculty"
+      "role": "Faculty",
+      "name": "faculty_name",
+      "department": "faculty_department"
     },
     "accessToken": "access_token",
     "refreshToken": "refresh_token"
@@ -170,8 +194,62 @@
   }
   ```
 
+### Subject Routes
+
+#### Assign Subject to Faculty
+- **URL:** `/api/admin/assign-subject`
+- **Method:** `POST`
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer admin_access_token"
+  }
+  ```
+- **Request Body:**
+  ```json
+  {
+    "facultyId": "faculty_id",
+    "sunjectName":"subjectName",
+    "SubjectSem":"SubjectSem"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "message": "Subject assigned successfully",
+    "faculty": {
+      "id": "faculty_id",
+      "username": "faculty_username",
+      "subjects": ["subject_id"]
+    }
+  }
+  ```
+
+#### Get Assigned Subjects for Faculty
+- **URL:** `/api/faculty/assigned-subjects`
+- **Method:** `GET`
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer faculty_access_token"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "subjects": [
+      {
+        "id": "subject_id",
+        "subjectName": "subject_name",
+        "subjectSem": subject_semester,
+        "totalClasses": total_classes
+      }
+    ]
+  }
+  ```
+
 #### Register Admin
-- **URL:** `/api/auth/admin-register`
+- **URL:** `/api/admin-register`
 - **Method:** `POST`
 - **Request Body:**
   ```json
@@ -195,10 +273,9 @@
   ```
 
 #### Login Admin
-- **URL:** `/api/auth/admin-login`
+- **URL:** `/api/admin-login`
 - **Method:** `POST`
 - **Request Body:**
-
   ```json
   {
     "username": "admin_username",
@@ -206,14 +283,13 @@
     "secretKey": "secretKey"
   }
   ```
-
 - **Response:**
   ```json
   {
     "message": "Login successful",
     "user": {
       "id": "admin_id",
-      "username": "admin_username",
+      "username": "admin_username"
     },
     "accessToken": "access_token",
     "refreshToken": "refresh_token"

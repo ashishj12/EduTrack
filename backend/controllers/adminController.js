@@ -5,6 +5,7 @@ import { validateAdminLogin, validateAdminRegister, validateRegistration, valida
 import { generateTokens } from "../utils/generateToken.js";
 import logger from "../utils/logger.js";
 import { generateRandomSecretKey } from "../middleware/generateSecretKey.js"; // Importing the function
+import Subject from "../models/subject.model.js";
 
 export const registerAdmin = async (req, res) => {
   try {
@@ -166,7 +167,7 @@ export const registerFaculty = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const { username, password } = value;
+    const { username, password ,name,department} = value;
 
     // Check if username already exists
     const existingFaculty = await Faculty.findOne({ username });
@@ -178,6 +179,9 @@ export const registerFaculty = async (req, res) => {
     const faculty = new Faculty({
       username,
       password,
+      name,
+      department,
+      subjects,
       role: "Faculty",
     });
 
@@ -195,11 +199,85 @@ export const registerFaculty = async (req, res) => {
         id: faculty._id,
         username: faculty.username,
         role: faculty.role,
+        name: faculty.name,
+        department: faculty.department,
+        subjects: faculty.subjects,
       },
       ...tokens,
     });
   } catch (error) {
     logger.error(`Registration error: ${error.message}`);
     return res.status(500).json({ message: "Server error during registration" });
+  }
+};
+
+export const assignSubjectToFaculty = async (req, res) => {
+  try {
+    const { subjectName, subjectSem, facultyId } = req.body;
+
+    // Validate input
+    if (!subjectName || !subjectSem || !facultyId) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check if faculty exists
+    const faculty = await Faculty.findById(facultyId);
+    if (!faculty) {
+      return res.status(404).json({ message: "Faculty not found" });
+    }
+
+    // Create or find the subject
+    let subject = await Subject.findOne({ subjectName, subjectSem });
+    if (!subject) {
+      subject = new Subject({ subjectName, subjectSem, taughtBy: facultyId });
+      await subject.save();
+    } else {
+      // Update the subject's faculty reference
+      subject.taughtBy = facultyId;
+      await subject.save();
+    }
+
+    // Add the subject to the faculty's subjects array if not already present
+    if (!faculty.subjects.includes(subject._id)) {
+      faculty.subjects.push(subject._id);
+      await faculty.save();
+    }
+
+    res.status(200).json({
+      message: "Subject assigned successfully",
+      faculty: {
+        id: faculty._id,
+        username: faculty.username,
+        subjects: faculty.subjects,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error assigning subject: ${error.message}`);
+    res.status(500).json({ message: "Server error during subject assignment" });
+  }
+};
+
+export const getAssignedSubjectsByFaculty = async (req, res) => {
+  try {
+    const { facultyId, subjectId } = req.query;
+
+    // Validate faculty existence
+    const faculty = await Faculty.findById(facultyId).populate("subjects");
+    if (!faculty) {
+      return res.status(404).json({ message: "Faculty not found" });
+    }
+
+    // Filter subjects if subjectId is provided
+    const subjects = subjectId
+      ? faculty.subjects.filter((subject) => subject._id.toString() === subjectId)
+      : faculty.subjects;
+
+    res.status(200).json({
+      message: "Assigned subjects retrieved successfully",
+      subjects,
+    });
+  } catch (error) {
+    logger.error(`Error fetching assigned subjects: ${error.message}`);
+    res.status(500).json({ message: "Server error during fetching assigned subjects" });
   }
 };

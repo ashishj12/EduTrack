@@ -3,52 +3,6 @@ import logger from "../utils/logger.js";
 import { Faculty } from "../models/faculty.model.js";
 import { validateFacultyLogin } from "../utils/validation.js";
 
-// Register a new faculty
-export const registerFaculty = async (req, res, next) => {
-  try {
-    // Validate request data
-    const { error, value } = validateFacultyLogin(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { username, password } = value;
-
-    // Check if username already exists
-    const existingFaculty = await Faculty.findOne({ username });
-    if (existingFaculty) {
-      return res.status(400).json({ message: "Username already exists" });
-    }
-
-    // Create new faculty
-    const faculty = new Faculty({
-      username,
-      password,
-      role: "Faculty",
-    });
-
-    // Save faculty to database
-    await faculty.save();
-    logger.info(`New Faculty registered: ${username}`);
-
-    // Generate tokens
-    const tokens = await generateTokens(faculty);
-    
-    // Return success response
-    return res.status(201).json({
-      message: "Registration successful",
-      user: {
-        id: faculty._id,
-        username: faculty.username,
-        role: faculty.role,
-      },
-      ...tokens,
-    });
-  } catch (error) {
-    logger.error(`Registration error: ${error.message}`);
-    next(error);
-  }
-};
 
 // Login faculty
 export const loginFaculty = async (req, res, next) => {
@@ -84,6 +38,9 @@ export const loginFaculty = async (req, res, next) => {
         id: faculty._id,
         username: faculty.username,
         role: faculty.role,
+        name: faculty.name,
+        department: faculty.department,
+        subjects: faculty.subjects,
       },
       ...tokens,
     });
@@ -111,6 +68,26 @@ export const getCurrentFaculty = async (req, res, next) => {
     });
   } catch (error) {
     logger.error(`Get current user error: ${error.message}`);
+    next(error);
+  }
+};
+
+export const getAssignedSubjects = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+
+    // Find faculty and populate assigned subjects
+    const faculty = await Faculty.findById(userId).populate("subjects");
+    if (!faculty) {
+      return res.status(404).json({ message: "Faculty not found" });
+    }
+
+    res.status(200).json({
+      message: "Assigned subjects retrieved successfully",
+      subjects: faculty.subjects,
+    });
+  } catch (error) {
+    logger.error(`Error fetching assigned subjects: ${error.message}`);
     next(error);
   }
 };
