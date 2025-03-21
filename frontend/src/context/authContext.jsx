@@ -52,6 +52,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
 
+
+
+      
       setCurrentUser(data.user);
       setLoading(false);
       return data.user;

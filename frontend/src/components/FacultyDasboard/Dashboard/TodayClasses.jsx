@@ -1,4 +1,4 @@
-import { Users, Clock } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 export default function TodayClasses() {
   const classes = [
@@ -39,17 +39,20 @@ export default function TodayClasses() {
   ];
 
   return (
-    <div className="mt-6 md:mt-8">
+    <div className="mt-8 md:mt-10 animate-fadeIn">
       <h2 className="text-lg md:text-xl font-semibold mb-4">Today's Classes</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {classes.map(classItem => (
-          <div key={classItem.id} className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+          <div 
+            key={classItem.id} 
+            className="bg-white p-4 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1"
+          >
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-base md:text-lg font-semibold">{classItem.name}</h3>
                 <p className="text-sm text-gray-500">{classItem.code}</p>
               </div>
-              <span className="text-sm text-gray-500">{classItem.time}</span>
+              <span className="text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md font-medium">{classItem.time}</span>
             </div>
             
             <div className="flex items-center gap-4 mb-4">
@@ -57,18 +60,19 @@ export default function TodayClasses() {
                 <Users className="w-4 h-4 text-gray-500" />
                 <span className="text-sm">{classItem.students} Students</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4 text-gray-500" />
-                <span className="text-sm">{classItem.time}</span>
-              </div>
             </div>
 
             {classItem.marked ? (
-              <div className="text-green-600 text-sm font-medium">
-                Attendance Marked • {classItem.present} / {classItem.students} Present
+              <div className="flex items-center justify-between">
+                <div className="text-green-600 text-sm font-medium">
+                  Attendance Marked
+                </div>
+                <div className="text-sm bg-green-50 text-green-700 px-2 py-1 rounded-full">
+                  {classItem.present} / {classItem.students}
+                </div>
               </div>
             ) : (
-              <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
                 Mark Attendance
               </button>
             )}
