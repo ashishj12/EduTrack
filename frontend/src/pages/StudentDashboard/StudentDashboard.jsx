@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Download, LogOut, User } from "lucide-react";
+import { Download, LogOut } from "lucide-react";
 import AttendanceCard from "../../components/StudentDashboard/AttendanceCard";
 import Calendar from "../../components/StudentDashboard/Calendar";
 import CorrectionRequestModal from "../../components/StudentDashboard/CorrectionRequestModal";
@@ -8,7 +8,7 @@ import RecentClassCard from "../../components/StudentDashboard/RecentClassCard";
 import { useAuth } from "../../context/authContext";
 
 const StudentDashboard = () => {
-  const { currentUser } = useAuth(); // Access the currentUser from context
+  const { currentUser, logout } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
@@ -23,6 +23,12 @@ const StudentDashboard = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isProfileDropdownOpen]);
+
+  const handleLogout = () => {
+    // Prevent browser back navigation
+    window.history.pushState(null, "", "/login");
+    logout();
+  };
 
   const openModal = () => {
     setIsBlurred(true);
@@ -79,17 +85,18 @@ const StudentDashboard = () => {
                 </div>
                 {isProfileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-10 border border-gray-100">
-                    <a href="#" className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                      <User className="w-4 h-4 mr-2" /> Profile
-                    </a>
-                    <a href="#" className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    >
                       <LogOut className="w-4 h-4 mr-2" /> Logout
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Rest of the dashboard content remains the same */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">

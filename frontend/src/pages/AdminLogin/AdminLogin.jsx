@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon, ShieldCheckIcon } from "lucide-react";
-import { loginAdminApi } from "../../services/authService"; // Import the API call
+import { useAuth } from "../../context/authContext";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +13,7 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { loginAdmin } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,29 +37,12 @@ const AdminLogin = () => {
       return;
     }
 
-    // Debug log to confirm if secretKey is in formData
-    console.log("Form Data on submit:", formData);
-
     try {
+      await loginAdmin(username, password, secretKey);
       
-      // Make API call to login the admin
-      const data = await loginAdminApi(username, password, secretKey);
-
-      // Store tokens in localStorage
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Redirect based on user role
-      if (data.user.role === "Admin") {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/"); // Redirect to home if the user is not an admin
-      }
-
-      setLoading(false);
+      // Navigate to admin dashboard on successful login
+      navigate("/admin-dashboard");
     } catch (err) {
-      console.error("Login Error:", err);
       setError(err.message || "Login failed");
       setLoading(false);
     }
@@ -150,7 +134,7 @@ const AdminLogin = () => {
                 required
               />
               <div className="mt-2 flex items-start p-3 bg-gray-50 rounded-md">
-                <EyeIcon className="h-5 w-5 text-gray-500 mr-2 flex-shrink-0 mt-0.5" />
+                <ShieldCheckIcon className="h-5 w-5 text-gray-500 mr-2 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-gray-600">
                   The secret key is required and will be provided by your system
                   administrator
@@ -158,11 +142,11 @@ const AdminLogin = () => {
               </div>
             </div>
 
-            {error && <p className="text-red-500 text-center">{error}</p>}
+            {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md transition duration-300 mt-4"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md transition duration-300"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Login"}

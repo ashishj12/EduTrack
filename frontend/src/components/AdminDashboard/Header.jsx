@@ -12,6 +12,16 @@ const Header = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
+
+    window.history.pushState(null, "", "/admin");
+    
+    // Add event listener to prevent back navigation
+    const preventBackNavigation = (event) => {
+      event.preventDefault();
+      window.history.pushState(null, "", "/admin");
+    };
+    window.addEventListener('popstate', preventBackNavigation);
+
     navigate("/admin"); 
   };
 
@@ -46,8 +56,7 @@ const Header = () => {
             <button 
               className="text-sm text-gray-700 hover:text-gray-900 flex items-center space-x-1 focus:outline-none focus:ring-2 focus:ring-gray-200 rounded-full p-1"
               aria-label="Logout"
-              onClick={handleLogout} // Add the logout handler here
-            >
+              onClick={handleLogout} >
               <LogOut className="w-5 h-5" />
               <span className="hidden lg:inline">Logout</span>
             </button>
@@ -60,16 +69,14 @@ const Header = () => {
             <div className="px-4 py-4 space-y-2">
               <button 
                 className="w-full text-left flex items-center space-x-2 p-2 hover:bg-gray-100"
-                aria-label="View notifications"
-              >
+                aria-label="View notifications" >
                 <Bell className="w-5 h-5" />
                 <span>Notifications</span>
               </button>
               <button
-                onClick={handleLogout} // Add the logout handler here
+                onClick={handleLogout} 
                 className="w-full text-left flex items-center space-x-2 p-2 hover:bg-gray-100 cursor-pointer"
-                aria-label="Logout" 
-              >
+                aria-label="Logout" >
                 <LogOut className="w-5 h-5" />
                 <span>Logout</span>
               </button>

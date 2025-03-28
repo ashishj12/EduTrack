@@ -1,21 +1,15 @@
-import { useState, lazy, Suspense } from 'react';
+import {  lazy, Suspense } from 'react';
 import { Loader } from 'lucide-react';
+import { useAuth } from '../../context/authContext';
 
 // Lazy loaded components
-const RecentRecords = lazy(() => import('../../components/FacultyDasboard/Dashboard/RecentRecords'));
 const TodayClasses = lazy(() => import('../../components/FacultyDasboard/Dashboard/TodayClasses'));
 const QuickActions = lazy(() => import('../../components/FacultyDasboard/Dashboard/QuickActions'));
 const Header = lazy(() => import('../../components/FacultyDasboard/Layout/Header'));
-const Sidebar = lazy(() => import('../../components/FacultyDasboard/Layout/Sidebar'));
+const RecentRecords = lazy(() => import('../../components/FacultyDasboard/Dashboard/RecentRecords'));
 
 export default function Dashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const user = {
-    name: 'Dr. Shrinath Tailor',
-    department: 'Computer Science Department',
-    avatar: 'https://ui-avatars.com/api/?name=Shrinath+Tailor&background=random&color=fff'
-  };
+  const { currentUser } = useAuth();
 
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center h-screen w-full">
@@ -29,14 +23,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Suspense fallback={<LoadingSpinner />}>
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <Header 
-          title="Faculty Dashboard" 
-          user={user} 
-          onMenuClick={() => setIsSidebarOpen(true)} 
-        />
-        <main className="pt-16 md:pt-20 md:ml-64 p-4 md:p-6 transition-all duration-300">
-          <div className="max-w-7xl mx-auto">
+        <Header title="Faculty Dashboard" user={currentUser} />
+        <main className="pt-20 p-4 md:p-6 transition-all duration-300">
+          <div className="max-w-7xl mx-auto space-y-8">
             <QuickActions />
             <TodayClasses />
             <RecentRecords />

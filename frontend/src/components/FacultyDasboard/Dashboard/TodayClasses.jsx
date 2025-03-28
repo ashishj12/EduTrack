@@ -1,6 +1,10 @@
-import { Users } from 'lucide-react';
+import { useState } from 'react';
+import { Users, X } from 'lucide-react';
+import UploadImage from '../../../pages/FacultyDashboard/UploadImage';
 
 export default function TodayClasses() {
+  const [uploadClassId, setUploadClassId] = useState(null);
+
   const classes = [
     {
       id: 1,
@@ -38,6 +42,14 @@ export default function TodayClasses() {
     }
   ];
 
+  const handleMarkAttendance = (classId) => {
+    setUploadClassId(classId);
+  };
+
+  const handleCloseUpload = () => {
+    setUploadClassId(null);
+  };
+
   return (
     <div className="mt-8 md:mt-10 animate-fadeIn">
       <h2 className="text-lg md:text-xl font-semibold mb-4">Today's Classes</h2>
@@ -72,13 +84,38 @@ export default function TodayClasses() {
                 </div>
               </div>
             ) : (
-              <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <button 
+                onClick={() => handleMarkAttendance(classItem.id)}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
                 Mark Attendance
               </button>
             )}
           </div>
         ))}
       </div>
+
+      {/* Attendance Upload Overlay */}
+      {uploadClassId && (
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-sm animate-fadeIn overflow-y-auto p-4">
+          <div className="relative w-full max-w-4xl mx-4 bg-white rounded-xl shadow-2xl overflow-hidden max-h-[90vh]">
+            <div className="flex justify-end p-2">
+              <button 
+                onClick={handleCloseUpload} 
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            <div className="p-6">
+              <UploadImage 
+                onClose={handleCloseUpload} 
+                selectedClass={classes.find(c => c.id === uploadClassId)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

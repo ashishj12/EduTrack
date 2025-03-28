@@ -27,7 +27,7 @@ const Login = () => {
       try {
         // Perform login based on currentLoginType
         let user;
-        if (currentLoginType === "Faculty") {
+        if (currentLoginType === "faculty") {
           user = await loginFaculty(username, password);
         } else {
           user = await login(username, password);
@@ -132,8 +132,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+                className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <input
@@ -151,8 +150,7 @@ const Login = () => {
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-              disabled={loading}
-            >
+              disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </button>
 

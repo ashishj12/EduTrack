@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import {
-  loginUserApi,
-  getCurrentUserApi,
+import { 
+  loginUserApi, 
+  getCurrentUserApi, 
   loginFacultyApi,
+  loginAdminApi 
 } from "../services/authService";
 
 // Create the context
@@ -23,15 +24,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("accessToken");
-      if (token) {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      
+      // If token and user data are available, set the user from localStorage
+      if (token && storedUser) {
         try {
-          const userData = await getCurrentUserApi();
-          setCurrentUser(userData.user);
+          // You can optionally verify the token via API call here if needed
+          setCurrentUser(storedUser);
         } catch (err) {
           // Clear all auth data on error
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("user");
+          clearAuthData();
           setError("Session expired. Please login again.");
         }
       }
@@ -40,6 +42,23 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
+  // Utility function to clear authentication data
+  const clearAuthData = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    setCurrentUser(null);
+  };
+
+  // Logout function
+  const logout = () => {
+    clearAuthData();
+    
+    // Prevent browser back navigation
+    window.history.pushState(null, "", "/login");
+    window.location.href = "/login";
+  };
+
   // Login function for student
   const login = async (username, password) => {
     setLoading(true);
@@ -47,13 +66,9 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const data = await loginUserApi(username, password);
-      // Store tokens in localStorage
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
-
-
-
       
       setCurrentUser(data.user);
       setLoading(false);
@@ -72,7 +87,6 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const data = await loginFacultyApi(username, password);
-      // Store tokens in localStorage
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -87,31 +101,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    setCurrentUser(null);
-  };
-
-  //admin login function
-  const loginAdmin = async (username, password) => {
+  // Admin login function
+  const loginAdmin = async (username, password, secretKey) => {
     setLoading(true);
     setError(null);
-
+  
     try {
-      const data = await loginAdmin(username, password);
-      // Store tokens in localStorage
+      const data = await loginAdminApi(username, password, secretKey);
+      
+      // Ensure the response contains the expected data
+      if (!data.user || data.user.role !== 'Admin') {
+        throw new Error('Invalid admin credentials');
+      }
+  
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.user));
-
+  
       setCurrentUser(data.user);
       setLoading(false);
       return data.user;
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err.message || "Admin login failed");
       setLoading(false);
       throw err;
     }
@@ -125,6 +136,7 @@ export const AuthProvider = ({ children }) => {
     loginFaculty,
     logout,
     loginAdmin,
+    clearAuthData,
     isAuthenticated: !!currentUser,
   };
 
