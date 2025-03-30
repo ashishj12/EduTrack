@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import { errorHandler } from "./middleware/errorHandler.js";
-import authRoutes from "./routes/authRoutes.js";
 import fileUploadRoutes from "./routes/fileUploadRoutes.js";
 import logger from "./utils/logger.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import facultyRoutes from "./routes/facultyRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-
 dotenv.config();
 
 const app = express();
@@ -27,9 +27,11 @@ mongoose
   .catch((e) => logger.error("MongoDB connection error:", e));
 
 // Set up routes
-app.use("/api/auth", authRoutes,adminRoutes);
-app.use("/api/admin", ); // Ensure this line is correct
-app.use("/api/upload", fileUploadRoutes); // Add this line
+app.use("/api/student", studentRoutes);
+app.use("/api/faculty", facultyRoutes);
+app.use("/api/upload", fileUploadRoutes); 
+app.use("/api/admin", adminRoutes); 
+
 
 // Error handler middleware should be after routes
 app.use(errorHandler);

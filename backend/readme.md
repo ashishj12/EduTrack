@@ -43,7 +43,7 @@
   ```
 
 #### Login Student
-- **URL:** `/api/auth/login`
+- **URL:** `/api/student/login`
 - **Method:** `POST`
 - **Request Body:**
   ```json
@@ -67,7 +67,7 @@
   ```
 
 #### Get Current Student
-- **URL:** `/api/auth/me`
+- **URL:** `/api/student/me`
 - **Method:** `GET`
 - **Headers:**
   ```json
@@ -123,7 +123,7 @@
   ```
 
 #### Login Faculty
-- **URL:** `/api/auth/login-faculty`
+- **URL:** `/api/faculty/login-faculty`
 - **Method:** `POST`
 - **Request Body:**
   ```json
@@ -147,7 +147,7 @@
   ```
 
 #### Get Current Faculty
-- **URL:** `/api/auth/faculty`
+- **URL:** `/api/faculty/get-faculty`
 - **Method:** `GET`
 - **Headers:**
   ```json
@@ -249,7 +249,7 @@
   ```
 
 #### Register Admin
-- **URL:** `/api/admin-register`
+- **URL:** `/api/admin/admin-register`
 - **Method:** `POST`
 - **Request Body:**
   ```json
@@ -273,7 +273,7 @@
   ```
 
 #### Login Admin
-- **URL:** `/api/admin-login`
+- **URL:** `/api/admin/admin-login`
 - **Method:** `POST`
 - **Request Body:**
   ```json

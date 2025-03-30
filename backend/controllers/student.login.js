@@ -1,17 +1,14 @@
 import { Student } from "../models/student.model.js";
 import { generateTokens } from "../utils/generateToken.js";
-import { validateRegistration, validateLogin } from "../utils/validation.js";
+import { validateStudentLogin } from "../utils/validation.js";
 import logger from "../utils/logger.js";
-
-// Register a new student
-
 
 
 // Login student
 export const loginUser = async (req, res, next) => {
   try {
     // Validate request data
-    const { error, value } = validateLogin(req.body);
+    const { error, value } = validateStudentLogin(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }

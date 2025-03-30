@@ -1,7 +1,7 @@
 import { Admin } from "../models/admin.model.js";
 import { Student } from "../models/student.model.js";
 import { Faculty } from "../models/faculty.model.js";
-import { validateAdminLogin, validateAdminRegister, validateRegistration, validateFacultyLogin } from "../utils/validation.js";
+import { validateAdminLogin, validateAdminRegister, validateStudentRegistration, validateFacultyRegister } from "../utils/validation.js";
 import { generateTokens } from "../utils/generateToken.js";
 import logger from "../utils/logger.js";
 import { generateRandomSecretKey } from "../middleware/generateSecretKey.js"; // Importing the function
@@ -105,7 +105,7 @@ export const loginAdmin = async (req, res) => {
 export const registerStudent = async (req, res) => {
   try {
     // Validate request data
-    const { error, value } = validateRegistration(req.body);
+    const { error, value } = validateStudentRegistration(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
@@ -162,12 +162,12 @@ export const registerStudent = async (req, res) => {
 export const registerFaculty = async (req, res) => {
   try {
     // Validate request data
-    const { error, value } = validateFacultyLogin(req.body);
+    const { error, value } = validateFacultyRegister(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const { username, password ,name,department} = value;
+    const { username, password ,name,department,subjects} = value;
 
     // Check if username already exists
     const existingFaculty = await Faculty.findOne({ username });

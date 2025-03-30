@@ -1,7 +1,7 @@
 import Joi from "joi";
 
-// Validate registration input
-export const validateRegistration = (data) => {
+// Validate Student Register
+export const validateStudentRegistration = (data) => {
   const schema = Joi.object({
     username: Joi.string().required(),
     password: Joi.string().required(),
@@ -14,11 +14,23 @@ export const validateRegistration = (data) => {
   return schema.validate(data);
 };
 
-// Validate login input
-export const validateLogin = (data) => {
+// Validate student login
+export const validateStudentLogin = (data) => {
   const schema = Joi.object({
     username: Joi.string().min(3).max(50).required(),
     password: Joi.string().min(6).required(),
+  });
+
+  return schema.validate(data);
+};
+
+export const validateFacultyRegister = (data) => {
+  const schema = Joi.object({
+    username: Joi.string().min(3).max(50).required(),
+    password: Joi.string().min(6).required(),
+    name: Joi.string().required(), 
+    department: Joi.string().required(),
+    subjects: Joi.array().items(Joi.string().hex().length(24)).optional()//optional subjects at time of registration
   });
 
   return schema.validate(data);
@@ -28,9 +40,6 @@ export const validateFacultyLogin = (data) => {
   const schema = Joi.object({
     username: Joi.string().min(3).max(50).required(),
     password: Joi.string().min(6).required(),
-    name: Joi.string().required(), // Ensure name is required
-    department: Joi.string().required(), // Ensure department is required
-    subjects: Joi.array().items(Joi.string().hex().length(24)).optional()//optional subjects at time of registration
   });
 
   return schema.validate(data);
