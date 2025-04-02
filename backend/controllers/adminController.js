@@ -1,7 +1,7 @@
 import { Admin } from "../models/admin.model.js";
 import { Student } from "../models/student.model.js";
 import { Faculty } from "../models/faculty.model.js";
-import { validateAdminLogin, validateAdminRegister, validateStudentRegistration, validateFacultyRegister } from "../utils/validation.js";
+import { validateAdminLogin, validateAdminRegister, validateStudentRegistration, validateFacultyRegister} from "../utils/validation.js";
 import { generateTokens } from "../utils/generateToken.js";
 import logger from "../utils/logger.js";
 import { generateRandomSecretKey } from "../middleware/generateSecretKey.js"; // Importing the function
@@ -181,7 +181,7 @@ export const registerFaculty = async (req, res) => {
       password,
       name,
       department,
-      subjects,
+      // subjects,
       role: "Faculty",
     });
 
@@ -200,8 +200,8 @@ export const registerFaculty = async (req, res) => {
         username: faculty.username,
         role: faculty.role,
         name: faculty.name,
-        department: faculty.department,
-        subjects: faculty.subjects,
+        department: faculty.department
+        // subjects: faculty.subjects,
       },
       ...tokens,
     });

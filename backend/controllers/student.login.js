@@ -72,3 +72,14 @@ export const getCurrentUser = async (req, res, next) => {
     next(error);
   }
 };
+
+//get all students
+export const getAllStudents = async (req, res, next) => {
+  try {
+    const students = await Student.find({}).select("-password");
+    res.status(200).json({ students }); 
+  } catch (error) {
+    logger.error(`Get all students error: ${error.message}`);
+    next(error);
+  }
+};

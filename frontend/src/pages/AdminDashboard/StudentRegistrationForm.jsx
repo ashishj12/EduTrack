@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2"; 
+import { useAuth } from "../../context/authContext";
+
 const StudentRegistrationForm = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    studentName: "",
+    username: "",
+    password: "",
+    name: "",
     branch: "",
     semester: "",
     batch: "",
   });
 
+  const { adminRegisterStudent } = useAuth();
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -24,18 +29,50 @@ const StudentRegistrationForm = ({ isOpen, onClose, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData); // Call onSubmit with form data
-
-    // Show SweetAlert on successful registration
-    Swal.fire({
-      title: "Done!",
-      text: "Student registered successfully.",
-      icon: "success",
-      showConfirmButton: false,
-      timer: 1500
-    });
+    try {
+      await adminRegisterStudent(
+        formData.username,
+        formData.password,
+        formData.name,
+        formData.branch,
+        formData.batch,
+        formData.semester
+      );
+      
+      // Show SweetAlert on successful registration
+      Swal.fire({
+        title: "Done!",
+        text: "Student registered successfully.",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1500
+      });
+      
+      // Call onSubmit callback with the form data
+      if (onSubmit) {
+        onSubmit(formData);
+      }
+      
+      // Reset form
+      setFormData({
+        username: "",
+        password: "",
+        name: "",
+        branch: "",
+        semester: "",
+        batch: "",
+      });
+      onClose();
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to register student.",
+        icon: "error",
+        showConfirmButton: true
+      });
+    }
   };
 
   if (!isOpen) return null;
@@ -52,18 +89,46 @@ const StudentRegistrationForm = ({ isOpen, onClose, onSubmit }) => {
 
         <form onSubmit={handleSubmit} className="space-y-5 p-6">
           <div className="space-y-2">
-            <label htmlFor="studentName" className="block font-medium">
+            <label htmlFor="username" className="block font-medium">
+              Roll No
+            </label>
+            <input
+              id="username"
+              name="username"
+              placeholder="Enter username"
+              value={formData.username}
+              onChange={handleInputChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md" />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="password" className="block font-medium">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md" />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="name" className="block font-medium">
               Student Name
             </label>
             <input
-              id="studentName"
-              name="studentName"
+              id="name"
+              name="name"
               placeholder="Enter student's full name"
-              value={formData.studentName}
+              value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
+              className="w-full p-2 border border-gray-300 rounded-md" />
           </div>
 
           <div className="space-y-2">
@@ -76,10 +141,9 @@ const StudentRegistrationForm = ({ isOpen, onClose, onSubmit }) => {
               value={formData.branch}
               onChange={handleBranchChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
-            >
+              className="w-full p-2 border border-gray-300 rounded-md" >
               <option value="" disabled>Select branch</option>
-              <option value="computer-science">Computer Science</option>
+              <option value="CSE">CSE</option>
             </select>
           </div>
 

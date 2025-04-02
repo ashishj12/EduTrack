@@ -1,9 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { 
   loginUserApi, 
-  getCurrentUserApi, 
   loginFacultyApi,
-  loginAdminApi 
+  loginAdminApi,
+  registerStudentApi,
+  getAllStudentsApi,
+  getAllFacultiesApi,
+  registerFacultyApi,
+  assignSubjectToFacultyApi,
 } from "../services/authService";
 
 // Create the context
@@ -80,6 +84,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  //get all students
+  const getAllStudents = async () => {
+    try {
+      const response = await getAllStudentsApi();
+      console.log('All Students:', response); // Log the response for debugging
+      return response; 
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      setError(err.message || "Failed to fetch students");
+      throw err; // Rethrow the error to be caught in the StudentManagement component
+    }
+  };
+
   // Login function for faculty
   const loginFaculty = async (username, password) => {
     setLoading(true);
@@ -97,6 +114,18 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message || "Login failed");
       setLoading(false);
+      throw err;
+    }
+  };
+
+  //get all faculties
+  const getAllFaculties = async () => {
+    try {
+      const response = await getAllFacultiesApi();
+      return response; 
+    } catch (err) {
+      console.error("Error fetching faculties:", err);
+      setError(err.message || "Failed to fetch faculties");
       throw err;
     }
   };
@@ -128,15 +157,81 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Admin register student function
+  const adminRegisterStudent = async (username, password, name, branch, batch, semester) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const studentData = { 
+        username, 
+        password, 
+        name,  
+        branch, 
+        semester, 
+        batch 
+      };
+      
+      const data = await registerStudentApi(studentData);
+      setLoading(false);
+      return data;
+    } catch (err) {
+      setError(err.message || "Student registration failed");
+      setLoading(false);
+      throw err;
+    }
+  };
+
+
+// add faculty registration function here
+  const adminRegisterFaculty = async (username, password, name, department, subjects) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+
+      const facultyData = { username, password, name,  department, subjects };
+      const data = await registerFacultyApi(facultyData);
+      setLoading(false);
+      return data;
+    } catch (err) {
+      setError(err.message || "Faculty registration failed");
+      setLoading(false);
+      throw err;
+    }
+  }
+
+  //assign subject to faculty
+  const assignSubjectToFaculty = async (subjectName, subjectSem,facultyId) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await assignSubjectToFacultyApi(subjectName, subjectSem,facultyId);
+      setLoading(false);
+      return data;
+    } catch (err) {
+      setError(err.message || "Subject assignment failed");
+      setLoading(false);
+      throw err;
+    }
+  }
+
+
   const value = {
     currentUser,
     loading,
     error,
     login,
+    getAllStudents,
     loginFaculty,
+    getAllFaculties,
     logout,
     loginAdmin,
     clearAuthData,
+    adminRegisterFaculty,
+    adminRegisterStudent,
+    assignSubjectToFaculty,
     isAuthenticated: !!currentUser,
   };
 

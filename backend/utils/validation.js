@@ -30,7 +30,7 @@ export const validateFacultyRegister = (data) => {
     password: Joi.string().min(6).required(),
     name: Joi.string().required(), 
     department: Joi.string().required(),
-    subjects: Joi.array().items(Joi.string().hex().length(24)).optional()//optional subjects at time of registration
+    // subjects: Joi.array().items(Joi.string().hex()).optional()
   });
 
   return schema.validate(data);

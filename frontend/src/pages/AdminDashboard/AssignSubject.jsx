@@ -1,61 +1,99 @@
 import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2"; // Ensure SweetAlert2 is imported
+import Swal from "sweetalert2"; 
+import { useAuth } from "../../context/authContext"; 
 
 const AssignSubject = ({ isOpen, onClose, onSubmit }) => {
-  // State to manage local visibility of the modal
   const [modalOpen, setModalOpen] = useState(false);
-
-  // State for form data
+  const [faculties, setFaculties] = useState([]);
   const [formData, setFormData] = useState({
     subjectName: "",
-    semester: "",
-    faculty: "",
+    subjectSem: "",
+    facultyId: "",
   });
 
-  // Effect to handle modal visibility
+  const { assignSubjectToFaculty, getAllFaculties } = useAuth();
   useEffect(() => {
     setModalOpen(isOpen);
+    if (isOpen) {
+      fetchFaculties();
+    }
   }, [isOpen]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Validate form data
-    if (!formData.subjectName || !formData.semester || !formData.faculty) {
+  // Function to fetch faculties from database
+  const fetchFaculties = async () => {
+    try {
+      const response = await getAllFaculties();
+      if (response && response.faculties) {
+        setFaculties(response.faculties);
+      } 
+      else {
+        throw new Error("Failed to load faculty data");
+      }
+    } catch (error) {
+      console.error("Error fetching faculties:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to load faculty data. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  // Function to validate form data
+  const validateForm = () => {
+    const { subjectName, subjectSem, facultyId } = formData;
+    if (!subjectName || !subjectSem || !facultyId) {
       Swal.fire({
         title: "Error!",
         text: "Please fill in all fields.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
       });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
       return;
     }
+    try {
+      await assignSubjectToFaculty(
+        formData.subjectName, 
+        formData.subjectSem, 
+        formData.facultyId
+      );
 
-    console.log("Form submitted:", formData);
-    
-    // Call onSubmit if provided
-    if (onSubmit) {
-      onSubmit(formData);
+      if (onSubmit) {
+        onSubmit(formData);
+      }
+      Swal.fire({
+        title: "Done!",
+        text: "Subject assigned to faculty successfully.",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      setFormData({
+        subjectName: "",
+        subjectSem: "",
+        facultyId: "",
+      });
+
+      // Close the modal
+      handleClose();
+    } catch (error) {
+      console.error("Error assigning subject:", error);
+      Swal.fire({
+        title: "Error!",
+        text: error.message || "An error occurred while assigning the subject.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
-
-    // Show success alert
-    Swal.fire({
-      title: "Done!",
-      text: "Subject assigned to faculty successfully.",
-      icon: "success",
-      showConfirmButton: false,
-      timer: 1500,
-    });
-
-    // Reset form and close
-    setFormData({
-      subjectName: "",
-      semester: "",
-      faculty: "",
-    });
-    
-    // Close the modal
-    handleClose();
   };
 
   const handleChange = (e) => {
@@ -71,9 +109,7 @@ const AssignSubject = ({ isOpen, onClose, onSubmit }) => {
     if (onClose) {
       onClose();
     }
-  };
-
-  // If modal is not open, return null
+  }
   if (!modalOpen) return null;
 
   return (
@@ -83,10 +119,7 @@ const AssignSubject = ({ isOpen, onClose, onSubmit }) => {
           {/* Close button */}
           <button 
             onClick={handleClose}
-            className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
-          >
-            ✕
-          </button>
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-900" > ✕ </button>
 
           <h2 className="text-2xl font-bold mb-6 text-center">
             Assign Subject to Faculty
@@ -113,14 +146,13 @@ const AssignSubject = ({ isOpen, onClose, onSubmit }) => {
                 Semester
               </label>
               <select
-                name="semester"
-                value={formData.semester}
+                name="subjectSem"
+                value={formData.subjectSem}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
+                required >
                 <option value="">Select semester</option>
-                <option value="8">Semester 8</option> 
+                <option value="8">Semester 8</option>
               </select>
             </div>
 
@@ -129,24 +161,27 @@ const AssignSubject = ({ isOpen, onClose, onSubmit }) => {
                 Assign Faculty
               </label>
               <select
-                name="faculty"
-                value={formData.faculty}
+                name="facultyId"
+                value={formData.facultyId}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
+                required >
                 <option value="">Select faculty member</option>
-                <option value="faculty1">Shrinath Tailor</option>
-                <option value="faculty2">Zubair Ahmed</option>
-                <option value="faculty3">Sarvesh Meena</option>
-                <option value="faculty4">Deepika Sainani</option>
+                {faculties.length > 0 ? (
+                  faculties.map((faculty) => (
+                    <option key={faculty._id} value={faculty._id}>
+                      {faculty.name} ({faculty.department})
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No faculty members found</option>
+                )}
               </select>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
-            >
+              className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors" >
               Assign Subject
             </button>
           </form>

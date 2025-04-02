@@ -91,3 +91,14 @@ export const getAssignedSubjects = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const getAllFaculties = async (req, res, next) => {
+  try {
+    const faculties = await Faculty.find({}).select("-password");
+    res.status(200).json({ faculties });
+  } catch (error) {
+    logger.error(`Error fetching faculties: ${error.message}`);
+    next(error);
+  }
+}

@@ -1,6 +1,6 @@
 import getBaseUrl from "../utils/baseUrl";
-
 const API_URL = `${getBaseUrl()}/api`;
+
 
 // Helper function for handling API responses
 const handleResponse = async (response) => {
@@ -13,7 +13,7 @@ const handleResponse = async (response) => {
 
 // Login user
 export const loginUserApi = async (username, password) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_URL}/student/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -30,7 +30,7 @@ export const getCurrentUserApi = async () => {
     throw new Error("No authentication token");
   }
 
-  const response = await fetch(`${API_URL}/auth/me`, {
+  const response = await fetch(`${API_URL}/student/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -42,7 +42,7 @@ export const getCurrentUserApi = async () => {
 
 // Login faculty
 export const loginFacultyApi = async (username, password) => {
-  const response = await fetch(`${API_URL}/auth/login-faculty`, {
+  const response = await fetch(`${API_URL}/faculty/login-faculty`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,14 +52,14 @@ export const loginFacultyApi = async (username, password) => {
   return handleResponse(response);
 };
 
-// Get current user
+// Get current faculty
 export const getCurrentFacultyApi = async () => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
     throw new Error("No authentication token");
   }
 
-  const response = await fetch(`${API_URL}/auth/faculty`, {
+  const response = await fetch(`${API_URL}/faculty/get-faculty`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -69,15 +69,14 @@ export const getCurrentFacultyApi = async () => {
   return handleResponse(response);
 };
 
-
-
+// Login admin
 export const loginAdminApi = async (username, password, secretKey) => {
-  const response = await fetch(`${API_URL}/auth/admin-login`, {
+  const response = await fetch(`${API_URL}/admin/admin-login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username, password, secretKey }), // Ensure secretKey is in the request body
+    body: JSON.stringify({ username, password, secretKey }), 
   });
 
   if (!response.ok) {
@@ -85,6 +84,122 @@ export const loginAdminApi = async (username, password, secretKey) => {
     throw new Error(errorData.message || "An error occurred");
   }
 
-  return response.json(); // Return the response JSON if successful
+  return response.json(); 
 };
 
+// Admin register student
+export const registerStudentApi = async (studentData) => {
+  const token = localStorage.getItem("accessToken");
+
+  // Ensure a valid token exists
+  if (!token) {
+    throw new Error("No authentication token found.");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/admin/register-student`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(studentData),
+    });
+
+    return await handleResponse(response); 
+  } catch (error) {
+    console.error("Error registering student:", error);
+    throw error;
+  }
+};
+
+
+//admin register faculty
+export const registerFacultyApi = async (facultyData) => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new Error("No authentication token found.");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/admin/register-faculty`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(facultyData),
+    });
+    return await handleResponse(response); 
+  } catch (error) {
+    console.error("Error registering faculty:", error);
+    throw error; 
+  }
+}
+
+//admin register subject to faculty
+export const assignSubjectToFacultyApi = async (subjectName, subjectSem,facultyId) => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new Error("No authentication token found.");
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/admin/assign-subject`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ subjectName, subjectSem,facultyId }),
+    });
+    return await handleResponse(response); 
+  } catch (error) {
+    console.error("Error assigning subject to faculty:", error);
+    throw error; 
+  }
+}
+
+export const getAllFacultiesApi = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/faculty/all-faculties`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error in getAllFacultiesApi:", error);
+    throw error;
+  }
+};
+
+
+export const getAllStudentsApi = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/student/all-students`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    throw error;
+  }
+};
