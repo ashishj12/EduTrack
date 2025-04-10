@@ -43,7 +43,7 @@
   ```
 
 #### Login Student
-- **URL:** `/api/auth/login`
+- **URL:** `/api/student/login-student`
 - **Method:** `POST`
 - **Request Body:**
   ```json
@@ -79,9 +79,13 @@
   ```json
   {
     "user": {
-      "id": "student_id",
+     "id": "student_id",
       "username": "student_username",
-      "role": "Student"
+      "role": "Student",
+      "name": "student_name",
+      "branch": "student_branch",
+      "batch": "student_batch",
+      "semester": student_semester
     }
   }
   ```
@@ -123,7 +127,7 @@
   ```
 
 #### Login Faculty
-- **URL:** `/api/auth/login-faculty`
+- **URL:** `/api/faculty/login-faculty`
 - **Method:** `POST`
 - **Request Body:**
   ```json
@@ -167,7 +171,7 @@
   ```
 
 #### Upload File for Faculty
-- **URL:** `/api/upload/faculty`
+- **URL:** `/api/faculty/upload`
 - **Method:** `POST`
 - **Headers:**
   ```json

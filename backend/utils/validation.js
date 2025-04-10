@@ -28,8 +28,8 @@ export const validateFacultyLogin = (data) => {
   const schema = Joi.object({
     username: Joi.string().min(3).max(50).required(),
     password: Joi.string().min(6).required(),
-    name: Joi.string().required(), // Ensure name is required
-    department: Joi.string().required(), // Ensure department is required
+    name: Joi.string().optional(), // Ensure name is required
+    department: Joi.string().optional(), // Ensure department is required
     subjects: Joi.array().items(Joi.string().hex().length(24)).optional()//optional subjects at time of registration
   });
 
@@ -73,3 +73,12 @@ export const validateGetAssignedSubjects = (data) => {
 
   return schema.validate(data);
 };
+export const validateCorrection = (data) => {
+  const schema = Joi.object({ 
+    subjectId: Joi.string().hex().length(24).required(),
+    date: Joi.date().required(),
+    reason: Joi.string().required(),
+    details: Joi.string().required(),
+  })
+  return schema.validate(data);
+ }

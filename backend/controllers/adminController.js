@@ -167,7 +167,7 @@ export const registerFaculty = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const { username, password ,name,department} = value;
+    const { username, password ,name,department,subjects} = value;
 
     // Check if username already exists
     const existingFaculty = await Faculty.findOne({ username });

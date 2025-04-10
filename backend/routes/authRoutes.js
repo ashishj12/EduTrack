@@ -1,5 +1,5 @@
 import express from "express";
-import { loginUser, getCurrentUser } from "../controllers/student.login.js";
+import { loginUser, getCurrentUser, makeCorrection } from "../controllers/student.login.js";
 import { authenticateToken } from "../middleware/authMiddlware.js";
 import { getCurrentFaculty, loginFaculty, getAssignedSubjects } from "../controllers/faculty.login.js";
 
@@ -8,6 +8,7 @@ const router = express.Router();
 //student routes
 router.post("/login", loginUser);
 router.get("/me", authenticateToken, getCurrentUser);
+router.post("/correction",authenticateToken,makeCorrection);
 
 //faculty routes
 router.post("/login-faculty", loginFaculty);
