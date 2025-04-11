@@ -1,5 +1,5 @@
 import express from "express";
-import { loginAdmin, registerAdmin, registerStudent, registerFaculty, assignSubjectToFaculty, getAssignedSubjectsByFaculty } from "../controllers/adminController.js";
+import { loginAdmin, registerAdmin, registerStudent, registerFaculty, assignSubjectToFaculty, getAssignedSubjectsByFaculty, getAllCorrections } from "../controllers/adminController.js";
 import { verifyAdminToken } from "../middleware/authMiddlware.js";
 import { validateAssignSubject, validateGetAssignedSubjects } from "../utils/validation.js";
 
@@ -28,5 +28,7 @@ router.get("/assigned-subjects", verifyAdminToken, (req, res, next) => {
   }
   next();
 }, getAssignedSubjectsByFaculty);
+
+router.get("/corrections",verifyAdminToken,getAllCorrections)
 
 export default router;

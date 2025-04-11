@@ -66,13 +66,13 @@ export const getCurrentUser = async (req, res, next) => {
 
     res.status(200).json({
       user: {
-        id: student._id,
-        username: student.username,
-        role: student.role,
-        name: student.name,
-        branch: student.branch,
-        batch: student.batch,
-        semester: student.semester,
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        branch: user.branch,
+        batch: user.batch,
+        semester: user.semester,
       },
     });
   } catch (error) {
@@ -80,6 +80,7 @@ export const getCurrentUser = async (req, res, next) => {
     next(error);
   }
 };
+
 export const makeCorrection = async (req, res, next) => {
  try {
   const { error, value } = validateCorrection(req.body);

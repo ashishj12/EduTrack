@@ -61,12 +61,12 @@ export const getCurrentFaculty = async (req, res, next) => {
 
     res.status(200).json({
       user: {
-        id: faculty._id,
-        username: faculty.username,
-        role: faculty.role,
-        name: faculty.name,
-        department: faculty.department,
-        subjects: faculty.subjects,
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        department: user.department,
+        subjects: user.subjects,
       },
     });
   } catch (error) {
@@ -74,6 +74,7 @@ export const getCurrentFaculty = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const getAssignedSubjects = async (req, res, next) => {
   try {
