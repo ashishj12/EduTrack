@@ -11,7 +11,7 @@ const handleResponse = async (response) => {
   return data;
 };
 
-// Login user
+// Login Student
 export const loginUserApi = async (username, password) => {
   const response = await fetch(`${API_URL}/student/login`, {
     method: "POST",
@@ -23,7 +23,7 @@ export const loginUserApi = async (username, password) => {
   return handleResponse(response);
 };
 
-// Get current user
+// Get current student
 export const getCurrentUserApi = async () => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
@@ -200,6 +200,77 @@ export const getAllStudentsApi = async () => {
     return handleResponse(response);
   } catch (error) {
     console.error("Error fetching students:", error);
+    throw error;
+  }
+};
+
+
+//get assigned subjects to faculty
+export const getAssignedSubjectsApi = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/faculty/assigned-subjects`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching assigned subjects:", error);
+    throw error;
+  }
+}
+
+// Mark attendance using image recognition
+export const markAttendanceApi = async (formData) => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/attendance/mark-attendance`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        // Don't set Content-Type when sending FormData
+      },
+      body: formData, // Send as FormData for file upload
+    });
+    
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error marking attendance:", error);
+    throw error;
+  }
+};
+
+// Get recent attendance records
+export const getRecentAttendanceApi = async (limit = 5) => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/attendance/all-attendance?limit=${limit}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching recent attendance:", error);
     throw error;
   }
 };

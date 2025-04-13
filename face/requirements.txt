@@ -1,0 +1,15 @@
+numpy
+mtcnn
+tensorflow
+keras
+matplotlib
+keras_facenet
+scikit-learn
+gunicorn
+pandas
+flask
+Pillow
+uvicorn
+fastapi
+python-multipart
+opencv-python-headless  # Instead of opencv-python

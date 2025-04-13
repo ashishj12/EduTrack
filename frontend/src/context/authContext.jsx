@@ -5,9 +5,12 @@ import {
   loginAdminApi,
   registerStudentApi,
   getAllStudentsApi,
+  getAssignedSubjectsApi,
   getAllFacultiesApi,
   registerFacultyApi,
   assignSubjectToFacultyApi,
+  markAttendanceApi,
+  getRecentAttendanceApi,
 } from "../services/authService";
 
 // Create the context
@@ -182,15 +185,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
-// add faculty registration function here
+  // add faculty registration function here
   const adminRegisterFaculty = async (username, password, name, department, subjects) => {
     setLoading(true);
     setError(null);
 
     try {
-
-      const facultyData = { username, password, name,  department, subjects };
+      const facultyData = { username, password, name, department, subjects };
       const data = await registerFacultyApi(facultyData);
       setLoading(false);
       return data;
@@ -202,12 +203,12 @@ export const AuthProvider = ({ children }) => {
   }
 
   //assign subject to faculty
-  const assignSubjectToFaculty = async (subjectName, subjectSem,facultyId) => {
+  const assignSubjectToFaculty = async (subjectName, subjectSem, facultyId) => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await assignSubjectToFacultyApi(subjectName, subjectSem,facultyId);
+      const data = await assignSubjectToFacultyApi(subjectName, subjectSem, facultyId);
       setLoading(false);
       return data;
     } catch (err) {
@@ -217,6 +218,53 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  //get assigned subjects to faculty
+  const getAssignedSubjects = async () => {
+    try {
+      const response = await getAssignedSubjectsApi();
+      return response; 
+    } catch (err) {
+      console.error("Error fetching assigned subjects:", err);
+      setError(err.message || "Failed to fetch assigned subjects");
+      throw err;
+    }
+  }
+
+  // Mark attendance using image recognition
+  const markAttendance = async (formData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Log FormData fields for debugging (optional)
+      // Note: FormData contents can't be directly logged
+      console.log("Submitting attendance...");
+
+      const data = await markAttendanceApi(formData);
+      console.log("Attendance API response:", data);
+      setLoading(false);
+      return data;
+    } catch (err) {
+      console.error("Error marking attendance:", err);
+      setError(err.message || "Failed to mark attendance");
+      setLoading(false);
+      throw err;
+    }
+  }
+
+  // Get recent attendance records
+  const getRecentAttendance = async (limit = 5) => {
+    try {
+      console.log("Fetching recent attendance records...");
+      const response = await getRecentAttendanceApi(limit);
+      console.log("Recent attendance API response:", response);
+      return response;
+    } catch (err) {
+      console.error("Error fetching recent attendance:", err);
+      setError(err.message || "Failed to fetch recent attendance records");
+      throw err;
+    }
+  }
 
   const value = {
     currentUser,
@@ -230,8 +278,11 @@ export const AuthProvider = ({ children }) => {
     loginAdmin,
     clearAuthData,
     adminRegisterFaculty,
+    getAssignedSubjects,
     adminRegisterStudent,
     assignSubjectToFaculty,
+    markAttendance,
+    getRecentAttendance,
     isAuthenticated: !!currentUser,
   };
 

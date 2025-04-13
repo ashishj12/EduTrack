@@ -1,6 +1,6 @@
 import { Student } from "../models/student.model.js";
 import { generateTokens } from "../utils/generateToken.js";
-import { validateStudentLogin } from "../utils/validation.js";
+import { validateStudentLogin ,validateCorrection } from "../utils/validation.js";
 import logger from "../utils/logger.js";
 
 
@@ -65,6 +65,10 @@ export const getCurrentUser = async (req, res, next) => {
         id: user._id,
         username: user.username,
         role: user.role,
+        name: user.name,
+        branch: user.branch,
+        batch: user.batch,
+        semester: user.semester,
       },
     });
   } catch (error) {
@@ -83,3 +87,36 @@ export const getAllStudents = async (req, res, next) => {
     next(error);
   }
 };
+
+//correction form
+export const makeCorrection = async (req, res, next) => {
+  try {
+   const { error, value } = validateCorrection(req.body);
+   if (error) {
+     return res.status(400).json({ message: error.details[0].message });
+   }
+   let { subjectId,date,reason,details}= value;
+   const correction= new Correction({
+     subjectId,
+     date,
+     reason,
+     details,
+   });
+   await correction.save();
+   logger.info(`Correction Request made successfully: ${correction}`);
+   return res.status(201).json({
+     message: "Correction correction made successfully",
+     correction: {
+       id: correction._id,
+       subject: correction.subject,
+       date: correction.date,
+       reason: correction.reason,
+       details: correction.details,
+     },
+   });
+  } catch (error) {
+     logger.error(`Make correction error: ${error.message}`);
+     next(error);
+   
+  } 
+ }

@@ -7,7 +7,7 @@ const router = express.Router();
 //faculty routes
 router.post("/login-faculty", loginFaculty);
 router.get("/get-faculty", authenticateToken, getCurrentFaculty);
-router.get("/faculty/assigned-subjects", authenticateToken, getAssignedSubjects);
+router.get("/assigned-subjects", authenticateToken, getAssignedSubjects);
 router.get("/all-faculties", authenticateToken, getAllFaculties);
 
 export default router;

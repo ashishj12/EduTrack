@@ -82,3 +82,14 @@ export const validateGetAssignedSubjects = (data) => {
 
   return schema.validate(data);
 };
+
+export const validateCorrection = (data) => {
+  const schema = Joi.object({
+    subjectId: Joi.string().hex().length(24).required(),
+    date: Joi.date().required(),
+    reason: Joi.string().required(),
+    details: Joi.string().required(),
+  });
+
+  return schema.validate(data);
+};

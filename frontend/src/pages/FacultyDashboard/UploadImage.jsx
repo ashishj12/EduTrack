@@ -1,21 +1,65 @@
-import { Upload, X } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { Upload, X, CheckCircle, Loader } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { useAuth } from "../../context/authContext";
 
 const UploadImage = ({ onClose, selectedClass }) => {
+  const { markAttendance, getAssignedSubjects } = useAuth();
+
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [assignedSubjects, setAssignedSubjects] = useState([]);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 
-  const getCurrentDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
+  const getCurrentDate = () => new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    if (!selectedClass) {
+      setError("Class information not provided.");
+    }
+  }, [selectedClass]);
+
+  // Fetch assigned subjects for the faculty
+  useEffect(() => {
+    const loadAssignedSubjects = async () => {
+      try {
+        setLoadingSubjects(true);
+        const response = await getAssignedSubjects();
+
+        // Extract subjects from the response
+        let subjectsData = [];
+        if (Array.isArray(response)) {
+          subjectsData = response;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          subjectsData = response.data;
+        } else if (
+          response &&
+          response.subjects &&
+          Array.isArray(response.subjects)
+        ) {
+          subjectsData = response.subjects;
+        }
+
+        setAssignedSubjects(subjectsData);
+      } catch (err) {
+        console.error("Error loading subjects:", err);
+        setError("Could not load assigned subjects.");
+      } finally {
+        setLoadingSubjects(false);
+      }
+    };
+
+    loadAssignedSubjects();
+  }, [getAssignedSubjects]);
 
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(e.type === "dragenter" || e.type === "dragover");
+    setDragActive(["dragenter", "dragover"].includes(e.type));
   };
 
   const handleDrop = (e) => {
@@ -23,66 +67,120 @@ const UploadImage = ({ onClose, selectedClass }) => {
     e.stopPropagation();
     setDragActive(false);
     const file = e.dataTransfer.files[0];
-    if (file && validateFile(file)) {
-      processFile(file);
-    }
+    if (file && validateFile(file)) processFile(file);
   };
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (file && validateFile(file)) {
-      processFile(file);
-    }
+    if (file && validateFile(file)) processFile(file);
   };
 
   const processFile = (file) => {
     setSelectedFile(file);
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
+    reader.onloadend = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    fileInputRef.current && (fileInputRef.current.value = "");
   };
 
   const validateFile = (file) => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
     const maxSize = 10 * 1024 * 1024;
-    
-    if (!validTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPG, PNG, JPEG)');
+
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      setError("Please select a valid image file (JPG, PNG, JPEG)");
       return false;
     }
-    
+
     if (file.size > maxSize) {
-      alert('File size exceeds 10MB limit');
+      setError("File size exceeds 10MB limit");
       return false;
     }
-    
+
+    setError(null);
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Processing attendance with file:', selectedFile);
-    onClose && onClose();
+    if (!selectedFile) {
+      setError("Please select an image file");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const formData = new FormData();
+      // Use "attendanceImage" as the field name which matches what the backend expects
+      formData.append("attendanceImage", selectedFile);
+      formData.append("subjectId", e.target.subject.value);
+      formData.append("date", e.target.date.value);
+      formData.append("batch", e.target.class.value);
+      formData.append("semester", e.target.semester.value);
+
+      // Log the formData for debugging (optional)
+      console.log("Form data fields:", {
+        subject: e.target.subject.value,
+        date: e.target.date.value,
+        batch: e.target.class.value,
+        semester: e.target.semester.value,
+        file: selectedFile.name,
+      });
+
+      const result = await markAttendance(formData);
+      console.log("Attendance marked successfully:", result);
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose?.();
+      }, 2000);
+    } catch (err) {
+      console.error("Attendance submission error:", err);
+      setError(
+        err.message || "Failed to process attendance. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (success) {
+    return (
+      <div className="w-full bg-white rounded-xl p-6 md:p-8">
+        <div className="flex flex-col items-center justify-center text-center">
+          <CheckCircle className="w-12 h-12 md:w-16 md:h-16 text-green-500 mb-3 md:mb-4" />
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-2">
+            Attendance Marked Successfully!
+          </h2>
+          <p className="text-gray-600 mb-5 md:mb-6">
+            The attendance has been processed and recorded.
+          </p>
+          <button
+            onClick={onClose}
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white rounded-xl">
-      <div className="p-4">
-        {/* Class Details Header */}
+      <div className="p-3 md:p-4">
+        {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h1 className="text-xl font-semibold">
-              {selectedClass?.name || 'Upload Attendance'}
+            <h1 className="text-lg md:text-xl font-semibold">
+              {selectedClass?.name || "Upload Attendance"}
             </h1>
             {selectedClass?.code && (
               <p className="text-gray-600 text-sm">{selectedClass.code}</p>
@@ -90,22 +188,28 @@ const UploadImage = ({ onClose, selectedClass }) => {
           </div>
         </div>
 
-        {/* Main Form Content */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image Upload Area */}
+          {/* Upload box */}
           <div
             className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200 ${
               dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
-            } ${imagePreview ? 'p-0' : ''}`}
+            } ${imagePreview ? "p-0" : ""}`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
-            onDrop={handleDrop} >
+            onDrop={handleDrop}
+          >
             {imagePreview ? (
-              <div className="relative w-full h-40">
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
+              <div className="relative w-full h-32 md:h-40">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
                   className="w-full h-full object-contain"
                 />
                 <button
@@ -117,7 +221,7 @@ const UploadImage = ({ onClose, selectedClass }) => {
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-center py-4 md:py-6">
                 <Upload className="text-gray-400 mb-2" size={24} />
                 <p className="text-gray-500 text-sm mb-2">
                   Drag & drop your image or
@@ -131,7 +235,7 @@ const UploadImage = ({ onClose, selectedClass }) => {
                 />
                 <button
                   type="button"
-                  className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-md hover:bg-blue-700"
+                  className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-md hover:bg-blue-700"
                   onClick={() => fileInputRef.current.click()}
                 >
                   Browse Files
@@ -143,82 +247,129 @@ const UploadImage = ({ onClose, selectedClass }) => {
             )}
           </div>
 
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Subject Dropdown */}
+          {/* Dropdowns and inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label htmlFor="subject" className="block text-sm text-gray-700 mb-1">
+              <label
+                htmlFor="subject"
+                className="block text-sm text-gray-700 mb-1"
+              >
                 Select Subject
               </label>
               <select
                 id="subject"
-                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                name="subject"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 defaultValue=""
                 required
               >
-                <option value="" disabled>Choose a subject</option>
-                <option value="bda">Big Data Analytics</option>
-                <option value="dm">Disaster Management</option>
-                <option value="stv">STV</option>
-                <option value="project">Project</option>
+                <option value="" disabled>
+                  Choose a subject
+                </option>
+                {loadingSubjects ? (
+                  <option value="" disabled>
+                    Loading subjects...
+                  </option>
+                ) : (
+                  assignedSubjects.map((subject) => (
+                    <option
+                      key={subject._id || subject.id}
+                      value={subject._id || subject.id}
+                    >
+                      {subject.subjectName || subject.name} (Sem{" "}
+                      {subject.subjectSem || subject.semester})
+                    </option>
+                  ))
+                )}
               </select>
             </div>
 
-            {/* Date Input */}
             <div>
-              <label htmlFor="date" className="block text-sm text-gray-700 mb-1">
+              <label
+                htmlFor="date"
+                className="block text-sm text-gray-700 mb-1"
+              >
                 Select Date
               </label>
               <input
                 type="date"
                 id="date"
-                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                name="date"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 defaultValue={getCurrentDate()}
                 required
               />
             </div>
 
-            {/* Class/Batch Dropdown */}
             <div>
-              <label htmlFor="class" className="block text-sm text-gray-700 mb-1">
+              <label
+                htmlFor="class"
+                className="block text-sm text-gray-700 mb-1"
+              >
                 Select Class/Batch
               </label>
               <select
                 id="class"
-                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                defaultValue=""
+                name="class"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                defaultValue="2021"
                 required
               >
-                <option value="" disabled>Select batch</option>
+                <option value="" disabled>
+                  Select batch
+                </option>
                 <option value="2021">2021</option>
               </select>
             </div>
 
-            {/* Semester Dropdown */}
             <div>
-              <label htmlFor="semester" className="block text-sm text-gray-700 mb-1">
+              <label
+                htmlFor="semester"
+                className="block text-sm text-gray-700 mb-1"
+              >
                 Select Semester
               </label>
               <select
                 id="semester"
-                className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                defaultValue=""
+                name="semester"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                defaultValue="8" // Changed from "semester 8" to just "8"
                 required
               >
-                <option value="" disabled>Select semester</option>
-                <option value="sem8">Semester 8</option>
+                <option value="" disabled>
+                  Select semester
+                </option>
+                {[8].map((sem) => (
+                  <option key={sem} value={sem}>
+                    Semester {sem}
+                  </option> // Changed value to just the number
+                ))}
               </select>
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit button */}
           <div className="flex justify-end mt-4">
             <button
-              type="submit"
-              className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              disabled={!selectedFile}
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1.5 mr-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
             >
-              Process Attendance
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
+              disabled={!selectedFile || loading}
+            >
+              {loading ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Process Attendance"
+              )}
             </button>
           </div>
         </form>

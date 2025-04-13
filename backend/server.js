@@ -4,10 +4,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { errorHandler } from "./middleware/errorHandler.js";
 import fileUploadRoutes from "./routes/fileUploadRoutes.js";
-import logger from "./utils/logger.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import facultyRoutes from "./routes/facultyRoutes.js";
+import attendanceRoutes from "./routes/attendanceRoutes.js";
+import logger from "./utils/logger.js";
 import adminRoutes from "./routes/adminRoutes.js";
+
 dotenv.config();
 
 const app = express();
@@ -31,7 +33,7 @@ app.use("/api/student", studentRoutes);
 app.use("/api/faculty", facultyRoutes);
 app.use("/api/upload", fileUploadRoutes); 
 app.use("/api/admin", adminRoutes); 
-
+app.use("/api/attendance", attendanceRoutes);
 
 // Error handler middleware should be after routes
 app.use(errorHandler);

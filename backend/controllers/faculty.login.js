@@ -64,6 +64,9 @@ export const getCurrentFaculty = async (req, res, next) => {
         id: user._id,
         username: user.username,
         role: user.role,
+        name: user.name,
+        department: user.department,
+        subjects: user.subjects,
       },
     });
   } catch (error) {
@@ -92,7 +95,7 @@ export const getAssignedSubjects = async (req, res, next) => {
   }
 };
 
-
+// Get all faculties
 export const getAllFaculties = async (req, res, next) => {
   try {
     const faculties = await Faculty.find({}).select("-password");

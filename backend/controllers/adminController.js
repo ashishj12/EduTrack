@@ -181,7 +181,6 @@ export const registerFaculty = async (req, res) => {
       password,
       name,
       department,
-      // subjects,
       role: "Faculty",
     });
 
@@ -200,8 +199,7 @@ export const registerFaculty = async (req, res) => {
         username: faculty.username,
         role: faculty.role,
         name: faculty.name,
-        department: faculty.department
-        // subjects: faculty.subjects,
+        department: faculty.department,
       },
       ...tokens,
     });
@@ -281,3 +279,13 @@ export const getAssignedSubjectsByFaculty = async (req, res) => {
     res.status(500).json({ message: "Server error during fetching assigned subjects" });
   }
 };
+// Get all corrections
+ export async function getAllCorrections(req, res) {
+  try {
+    const corrections = await Correction.find().populate("subjectId");
+    res.status(200).json(corrections);
+  } catch (error) {
+    logger.error(`Error fetching corrections: ${error.message}`);
+    res.status(500).json({ message: "Server error during fetching corrections" });
+  }
+}
