@@ -27,7 +27,7 @@ export default function TodayClasses() {
         }
 
         
-        // Transform the API response to match your component's expected format
+        // Transform the API response to match  component's  format
         const formattedClasses = subjectsData.map((subject, index) => ({
           id: subject._id || subject.id || `class-${index + 1}`,
           name: subject.subjectName || subject.name || 'Unnamed Subject',
@@ -35,7 +35,8 @@ export default function TodayClasses() {
           students: 60,
           marked: false,
           semester: subject.subjectSem || subject.semester || 'N/A',
-          department: subject.department || 'Computer Science'
+          department: subject.department || 'Computer Science',
+          subjectId: subject._id || subject.id 
         }));        
         setAssignedClasses(formattedClasses);
         setError(null);
@@ -50,7 +51,7 @@ export default function TodayClasses() {
     fetchAssignedSubjects();
   }, [getAssignedSubjects]);
 
-  // Better time slots function
+  // time slots function
   const getTimeSlot = (index) => {
     const timeSlots = [
       '09:30 AM - 10:20 AM', 

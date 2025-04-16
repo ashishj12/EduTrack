@@ -13,23 +13,18 @@ dotenv.config();
 
 export const markAttendance = async (req, res) => {
   try {
-    // 1. Check authentication and authorization
+    // Check authentication and authorization
     const { userId, role } = req.user;
     if (!req.user || role !== "Faculty") {
       return res.status(403).json({ message: "Only faculty can mark attendance" });
     }
 
-    // 2. Validate required fields
     const { subjectId, date, batch, semester } = req.body;
     if (!subjectId || !batch || !semester) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    console.log("Request body:", req.body);
-    console.log("File:", req.file);
-    console.log("Uploaded file URL:", req.uploadedFileUrl);
-
-    // 3. Check if the subject exists and faculty is authorized
+    //  Check if the subject exists and faculty is authorized
     const subject = await Subject.findById(subjectId);
     if (!subject) {
       return res.status(404).json({ message: "Subject not found" });
@@ -42,18 +37,18 @@ export const markAttendance = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized for this subject" });
     }
 
-    // 4. Validate image is provided
+    // Validate image is provided
     const imageUrl = req.uploadedFileUrl || (req.file ? req.file.path : null);
     if (!imageUrl) {
       return res.status(400).json({ message: "No attendance image provided" });
     }
 
-    // 5. Prepare image for ML model with better error handling
+    // Prepare image for ML model with better error handling
     let recognizedRollNumbers = [];
     try {
       const formData = new FormData();
       
-      // Handle file upload based on source (local file or URL)
+      // Handle file upload based on source 
       if (req.file?.path && existsSync(req.file.path)) {
         try {
           const fileBuffer = await fs.readFile(req.file.path);
@@ -66,7 +61,7 @@ export const markAttendance = async (req, res) => {
         try {
           const response = await axios.get(req.uploadedFileUrl, { 
             responseType: "arraybuffer",
-            timeout: 10000 // 10 seconds timeout
+            timeout: 10000 
           });
           formData.append("file", Buffer.from(response.data), "attendance.jpg");
         } catch (downloadErr) {
@@ -85,17 +80,13 @@ export const markAttendance = async (req, res) => {
         const headers = formData.getHeaders ? formData.getHeaders() : {};
         const mlResponse = await axios.post(`${mlApiUrl}/predict/`, formData, { 
           headers,
-          timeout: 30000 // 30 seconds timeout for ML processing
+          timeout: 30000 
         });
         
         console.log("ML API response:", mlResponse.data);
         recognizedRollNumbers = (mlResponse.data?.result || []).map(r => r.toLowerCase());
       } catch (mlApiErr) {
         console.error("Error calling ML API:", mlApiErr);
-        
-        // If ML API fails, we'll proceed with an empty recognition list
-        // This allows attendance to still be recorded (all marked absent)
-        // but logs the error and informs the user
         recognizedRollNumbers = [];
       }
     } catch (imageProcessingErr) {
@@ -106,7 +97,7 @@ export const markAttendance = async (req, res) => {
       });
     }
 
-    // 6. Fetch students and mark attendance
+    // Fetch students and mark attendance
     try {
       // Fetch all students for the batch and semester
       const students = await Student.find({ semester, batch }).select("_id username");
@@ -126,7 +117,7 @@ export const markAttendance = async (req, res) => {
         present: recognizedRollNumbers.includes(student.username.toLowerCase()),
       }));
 
-      // 7. Create and save attendance record
+      //  Create and save attendance record
       const attendanceRecord = new Attendance({
         subject: subjectId,
         date: date ? new Date(date) : new Date(),
@@ -141,10 +132,10 @@ export const markAttendance = async (req, res) => {
 
       await attendanceRecord.save();
 
-      // 8. Increment class count for the subject
+      //  Increment class count for the subject
       await Subject.findByIdAndUpdate(subjectId, { $inc: { totalClasses: 1 } });
 
-      // 9. Clean up uploaded file if exists locally
+      //  Clean up uploaded file if exists locally
       if (req.file?.path && existsSync(req.file.path)) {
         try {
           await fs.unlink(req.file.path);
@@ -154,7 +145,7 @@ export const markAttendance = async (req, res) => {
         }
       }
 
-      // 10. Return success response with summary
+      //  Return success response with summary
       return res.status(201).json({
         message: "Attendance marked successfully",
         attendanceRecords: {
@@ -218,7 +209,7 @@ export const getAllAttendance = async (req, res) => {
 
     // Fetch records with relevant populations
     const attendanceRecords = await Attendance.find(query)
-      .populate('subject', 'subjectId name semester')
+      .populate('subject', 'subjectId subjectName subjectSem')
       .populate('faculty', 'name username')
       .populate({
         path: 'students.studentId',

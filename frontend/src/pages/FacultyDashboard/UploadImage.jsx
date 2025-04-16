@@ -1,6 +1,7 @@
 import { Upload, X, CheckCircle, Loader } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { useAuth } from "../../context/authContext";
+import Swal from "sweetalert2";
 
 const UploadImage = ({ onClose, selectedClass }) => {
   const { markAttendance, getAssignedSubjects } = useAuth();
@@ -13,9 +14,12 @@ const UploadImage = ({ onClose, selectedClass }) => {
   const [assignedSubjects, setAssignedSubjects] = useState([]);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(getCurrentDate());
   const fileInputRef = useRef(null);
 
-  const getCurrentDate = () => new Date().toISOString().split("T")[0];
+  function getCurrentDate() {
+    return new Date().toISOString().split("T")[0];
+  }
 
   useEffect(() => {
     if (!selectedClass) {
@@ -43,7 +47,6 @@ const UploadImage = ({ onClose, selectedClass }) => {
         ) {
           subjectsData = response.subjects;
         }
-
         setAssignedSubjects(subjectsData);
       } catch (err) {
         console.error("Error loading subjects:", err);
@@ -73,6 +76,10 @@ const UploadImage = ({ onClose, selectedClass }) => {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file && validateFile(file)) processFile(file);
+  };
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
   };
 
   const processFile = (file) => {
@@ -118,24 +125,23 @@ const UploadImage = ({ onClose, selectedClass }) => {
       setError(null);
 
       const formData = new FormData();
-      // Use "attendanceImage" as the field name which matches what the backend expects
       formData.append("attendanceImage", selectedFile);
       formData.append("subjectId", e.target.subject.value);
-      formData.append("date", e.target.date.value);
+      formData.append("date", selectedDate);
       formData.append("batch", e.target.class.value);
       formData.append("semester", e.target.semester.value);
 
-      // Log the formData for debugging (optional)
-      console.log("Form data fields:", {
-        subject: e.target.subject.value,
-        date: e.target.date.value,
-        batch: e.target.class.value,
-        semester: e.target.semester.value,
-        file: selectedFile.name,
-      });
-
       const result = await markAttendance(formData);
       console.log("Attendance marked successfully:", result);
+
+      // Show SweetAlert in the center of the screen
+      Swal.fire({
+        position: "center", // Set position to center
+        icon: "success",
+        title: "Attendance Mark Successfully!",
+        showConfirmButton: false,
+        timer: 1500
+      });
 
       setSuccess(true);
       setTimeout(() => {
@@ -195,7 +201,7 @@ const UploadImage = ({ onClose, selectedClass }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Upload box */}
+          {/* Upload box - Improved responsiveness */}
           <div
             className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200 ${
               dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
@@ -206,7 +212,7 @@ const UploadImage = ({ onClose, selectedClass }) => {
             onDrop={handleDrop}
           >
             {imagePreview ? (
-              <div className="relative w-full h-32 md:h-40">
+              <div className="relative w-full h-32 sm:h-36 md:h-40">
                 <img
                   src={imagePreview}
                   alt="Preview"
@@ -247,7 +253,7 @@ const UploadImage = ({ onClose, selectedClass }) => {
             )}
           </div>
 
-          {/* Dropdowns and inputs */}
+          {/* Dropdowns and inputs - Improved responsive grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <div>
               <label
@@ -292,11 +298,14 @@ const UploadImage = ({ onClose, selectedClass }) => {
                 Select Date
               </label>
               <input
-                type="date"
+                type="text"
                 id="date"
                 name="date"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                defaultValue={getCurrentDate()}
+                value={selectedDate}
+                onChange={handleDateChange}
+                onClick={(e) => e.preventDefault()}
+                readOnly
                 required
               />
             </div>
@@ -333,7 +342,7 @@ const UploadImage = ({ onClose, selectedClass }) => {
                 id="semester"
                 name="semester"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                defaultValue="8" // Changed from "semester 8" to just "8"
+                defaultValue="8"
                 required
               >
                 <option value="" disabled>
@@ -342,25 +351,27 @@ const UploadImage = ({ onClose, selectedClass }) => {
                 {[8].map((sem) => (
                   <option key={sem} value={sem}>
                     Semester {sem}
-                  </option> // Changed value to just the number
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Submit button */}
-          <div className="flex justify-end mt-4">
+          {/* Completely redesigned button container */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 mr-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              className="w-full sm:w-auto order-2 sm:order-1 px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-center"
             >
               Cancel
             </button>
+            
             <button
               type="submit"
-              className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
               disabled={!selectedFile || loading}
+              className="w-full sm:w-auto order-1 sm:order-2 px-6 py-2 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-center inline-flex items-center justify-center"
+              style={{ minWidth: "180px" }} // Explicit min-width to ensure text fits
             >
               {loading ? (
                 <>
