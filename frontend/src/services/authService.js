@@ -274,3 +274,40 @@ export const getRecentAttendanceApi = async (limit = 5) => {
     throw error;
   }
 };
+
+// Get student attendance records
+export const getStudentAttendanceApi = async (filters = {}) => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.warn("No authentication token found.");
+      return []; 
+    }
+    
+    // Build query string from filters
+    const queryParams = new URLSearchParams();
+    if (filters.subject) queryParams.append('subject', filters.subject);
+    if (filters.semester) queryParams.append('semester', filters.semester);
+    if (filters.startDate) queryParams.append('startDate', filters.startDate);
+    if (filters.endDate) queryParams.append('endDate', filters.endDate);
+    
+    const url = `${API_URL}/attendance/get-student/records?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("API error:", errorData);
+      return []; 
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching student attendance:", error);
+    return []; 
+  }
+};

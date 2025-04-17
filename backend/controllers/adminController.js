@@ -6,6 +6,7 @@ import { generateTokens } from "../utils/generateToken.js";
 import logger from "../utils/logger.js";
 import { generateRandomSecretKey } from "../middleware/generateSecretKey.js"; // Importing the function
 import Subject from "../models/subject.model.js";
+import Correction from "../models/Correction.js";
 
 export const registerAdmin = async (req, res) => {
   try {

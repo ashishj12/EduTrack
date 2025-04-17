@@ -1,18 +1,205 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Download, LogOut } from "lucide-react";
-import AttendanceCard from "../../components/StudentDashboard/AttendanceCard";
 import Calendar from "../../components/StudentDashboard/Calendar";
 import CorrectionRequestModal from "../../components/StudentDashboard/CorrectionRequestModal";
 import ScheduleCard from "../../components/StudentDashboard/ScheduleCard";
 import RecentClassCard from "../../components/StudentDashboard/RecentClassCard";
 import { useAuth } from "../../context/authContext";
 
+//Circular progress component to show attendance percentage
+const CircularProgress = ({ percentage }) => {
+  const validPercentage = isNaN(percentage) ? 0 : Math.min(Math.max(0, percentage), 100);
+  const radius = 30; 
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (validPercentage / 100) * circumference;
+
+  return (
+    <div className="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20">
+      {/* SVG with responsive viewBox to scale properly */}
+      <svg
+        className="w-full h-full transform -rotate-90"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 80 80" >
+        <circle
+          className="text-gray-200"
+          strokeWidth="8"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx="40"
+          cy="40" />
+        <circle
+          className="text-green-500"
+          strokeWidth="8"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx="40"
+          cy="40" />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center text-base sm:text-lg font-semibold">
+        {validPercentage.toFixed(0)}%
+      </span>
+    </div>
+  );
+};
+
+// AttendanceCard component to display attendance details
+const AttendanceCard = ({ subject, totalClasses, present, absent, rate }) => {
+  const safeRate = isNaN(rate) ? 0 : Math.min(Math.max(0, rate), 100);
+  const safeTotal = totalClasses || 0;
+  const safePresent = present || 0;
+  const safeAbsent = absent || 0;
+  
+  // Truncate long subject names
+  const displaySubject = subject && subject.length > 25 
+    ? `${subject.substring(0, 22)}...` 
+    : subject || "Unknown Subject";
+
+  return (
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 truncate">
+        {displaySubject}
+      </h3>
+      <div className="flex justify-between items-center">
+        <div className="space-y-1 sm:space-y-2 flex-1 mr-2">
+          <div className="text-xs sm:text-sm">
+            <span className="text-gray-600">Total Classes: </span>
+            <span className="font-medium">{safeTotal}</span>
+          </div>
+          <div className="text-xs sm:text-sm">
+            <span className="text-green-600 font-medium">
+              Present: {safePresent}
+            </span>
+          </div>
+          <div className="text-xs sm:text-sm">
+            <span className="text-red-500 font-medium">Absent: {safeAbsent}</span>
+          </div>
+        </div>
+        {/* Wrapping CircularProgress to control its size and prevent overflow */}
+        <div className="flex-shrink-0">
+          <CircularProgress percentage={safeRate} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// StudentDashboard component
 const StudentDashboard = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, getStudentAttendance } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [recentClassesData, setRecentClassesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sectionLoading, setSectionLoading] = useState({
+    attendance: true,
+    recentClasses: true
+  });
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
+  // Improved data fetching with retry mechanism and caching
+  const fetchAttendanceData = useCallback(async () => {
+    setSectionLoading(prev => ({ ...prev, attendance: true, recentClasses: true }));
+    try {
+      // Check if data exists in session storage (simple cache)
+      const cachedData = sessionStorage.getItem('attendanceData');
+      const cacheTimestamp = sessionStorage.getItem('attendanceDataTimestamp');
+      const now = Date.now();
+      
+      // Use cached data if it's less than 5 minutes old
+      if (cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
+        const parsedData = JSON.parse(cachedData);
+        setAttendanceData(parsedData.subjectWiseData);
+        setRecentClassesData(parsedData.recentClasses);
+        setSectionLoading({
+          attendance: false,
+          recentClasses: false
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      const response = await getStudentAttendance();
+      if (response && response.data) {
+        // Process attendance data for the cards with error handling
+        const subjectWiseData = Array.isArray(response.data.statistics?.subjectWise) 
+          ? response.data.statistics.subjectWise.map(subject => ({
+              subject: subject.subject?.subjectName || "Unknown Subject",
+              totalClasses: parseInt(subject.totalClasses) || 0,
+              present: parseInt(subject.attendedClasses) || 0,
+              absent: (parseInt(subject.totalClasses) || 0) - (parseInt(subject.attendedClasses) || 0),
+              rate: parseFloat(subject.percentage) || 0
+            }))
+          : [];
+        
+        setAttendanceData(subjectWiseData);
+        
+        // Process recent classes data
+        const recentClasses = Array.isArray(response.data.attendanceRecords)
+          ? response.data.attendanceRecords
+              .slice(0, 4) // Get only the most recent 4 classes
+              .map(record => ({
+                subject: record.subject?.subjectName || "Unknown Subject",
+                date: record.date,
+                status: record.present ? "present" : "absent"
+              }))
+          : [];
+          
+        setRecentClassesData(recentClasses);
+        
+        // Save to session storage
+        sessionStorage.setItem('attendanceData', JSON.stringify({
+          subjectWiseData,
+          recentClasses
+        }));
+        sessionStorage.setItem('attendanceDataTimestamp', now.toString());
+        
+        setSectionLoading({
+          attendance: false,
+          recentClasses: false
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching attendance data:", err);
+      setError("Failed to load attendance data. Please try again later.");
+      setSectionLoading({
+        attendance: false,
+        recentClasses: false
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getStudentAttendance]);
+
+  // Fetch attendance data when component mounts with abort controller
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    async function loadData() {
+      try {
+        await fetchAttendanceData();
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error("Failed to load attendance data:", err);
+        }
+      }
+    }
+    
+    loadData();
+    
+    return () => {
+      controller.abort();
+    };
+  }, [fetchAttendanceData, retryCount]);
+
+  // Handle clicking outside of dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isProfileDropdownOpen && !event.target.closest('.profile-dropdown-container')) {
@@ -24,8 +211,15 @@ const StudentDashboard = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isProfileDropdownOpen]);
 
+  // Memoized scheduleData to prevent recreating on each render
+  const scheduleData = useMemo(() => [
+    { subject: "Big Data Analytics", time: "09:30 AM"},
+    { subject: "Disaster Management", time: "10:20 AM"},
+    { subject: "Project", time: "11:10 PM"},
+  ], []);
+
+  // Prevent navigation back after logout
   const handleLogout = () => {
-    // Prevent browser back navigation
     window.history.pushState(null, "", "/login");
     logout();
   };
@@ -39,26 +233,24 @@ const StudentDashboard = () => {
     setIsBlurred(false);
     setIsModalOpen(false);
   };
+  
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    setError(null);
+    setIsLoading(true);
+  };
 
-  const attendanceData = [
-    { subject: "Data Structures", totalClasses: 45, present: 42, absent: 3, rate: 93 },
-    { subject: "Computer Networks", totalClasses: 40, present: 35, absent: 5, rate: 87 },
-    { subject: "Operating Systems", totalClasses: 42, present: 38, absent: 4, rate: 90 },
-    { subject: "Database Management", totalClasses: 38, present: 35, absent: 3, rate: 92 },
-  ];
-
-  const recentClassesData = [
-    { subject: "Data Structures", date: "2024-02-09", status: "present" },
-    { subject: "Computer Networks", date: "2024-02-08", status: "absent" },
-    { subject: "Operating Systems", date: "2024-02-07", status: "present" },
-    { subject: "Database Management", date: "2024-02-06", status: "present" },
-  ];
-
-  const scheduleData = [
-    { subject: "Data Structures", time: "09:00 AM", room: "Room 301", status: "Completed" },
-    { subject: "Computer Networks", time: "11:00 AM", room: "Lab 201", status: "Ongoing" },
-    { subject: "Operating Systems", time: "02:00 PM", room: "Room 405", status: "Upcoming" },
-  ];
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -96,26 +288,80 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            {/* Rest of the dashboard content remains the same */}
+            {/* Error message if any */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                <p>{error}</p>
+                <button 
+                  onClick={handleRetry}
+                  className="mt-2 text-sm font-medium text-red-700 hover:text-red-800 underline"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Dashboard content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                {/* Attendance Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  {attendanceData.map((data, index) => (
-                    <AttendanceCard key={index} {...data} />
-                  ))}
+                  {sectionLoading.attendance ? (
+                    // Skeleton loaders for attendance cards
+                    [...Array(4)].map((_, index) => (
+                      <div key={index} className="bg-white p-4 sm:p-6 rounded-lg shadow-md animate-pulse">
+                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                        <div className="flex justify-between items-center">
+                          <div className="space-y-2 w-1/2">
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                          </div>
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-200"></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : attendanceData.length > 0 ? (
+                    attendanceData.map((data, index) => (
+                      <AttendanceCard key={index} {...data} />
+                    ))
+                  ) : (
+                    <div className="col-span-2 bg-white p-4 rounded-lg shadow-md text-center">
+                      <p className="text-gray-500">No attendance data available</p>
+                    </div>
+                  )}
                 </div>
 
+                {/* Recent Classes */}
                 <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Recent Classes</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    {recentClassesData.map((classData, index) => (
-                      <RecentClassCard key={index} {...classData} />
-                    ))}
+                    {sectionLoading.recentClasses ? (
+                      // Skeleton loaders for recent classes
+                      [...Array(4)].map((_, index) => (
+                        <div key={index} className="bg-gray-50 p-3 sm:p-4 rounded-lg animate-pulse">
+                          <div className="flex justify-between items-center">
+                            <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-5 bg-gray-200 rounded w-16"></div>
+                          </div>
+                          <div className="h-4 bg-gray-200 rounded w-1/3 mt-2"></div>
+                        </div>
+                      ))
+                    ) : recentClassesData.length > 0 ? (
+                      recentClassesData.map((classData, index) => (
+                        <RecentClassCard key={index} {...classData} />
+                      ))
+                    ) : (
+                      <div className="col-span-2 bg-gray-50 p-4 rounded-lg text-center">
+                        <p className="text-gray-500">No recent classes found</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4 sm:space-y-6">
+                {/* Quick Actions */}
                 <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Quick Actions</h2>
                   <div className="space-y-3">
@@ -134,6 +380,7 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
+                {/* Today's Schedule */}
                 <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h2 className="text-base sm:text-lg font-semibold p-4 sm:p-6 pb-2 sm:pb-4 text-gray-800">Today's Schedule</h2>
                   <div>
@@ -143,6 +390,7 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
+                {/* Calendar */}
                 <Calendar month={new Date().getMonth()} year={new Date().getFullYear()} />
               </div>
             </div>

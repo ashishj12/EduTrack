@@ -11,6 +11,7 @@ import {
   assignSubjectToFacultyApi,
   markAttendanceApi,
   getRecentAttendanceApi,
+  getStudentAttendanceApi,
 } from "../services/authService";
 
 // Create the context
@@ -266,6 +267,23 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Get student attendance records
+  const getStudentAttendance = async (filters = {}) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await getStudentAttendanceApi(filters);
+      setLoading(false);
+      return response;
+    } catch (err) {
+      console.error("Error fetching student attendance:", err);
+      setError(err.message || "Failed to fetch attendance records");
+      setLoading(false);
+      throw err;
+    }
+  };
+  
   const value = {
     currentUser,
     loading,
@@ -283,6 +301,7 @@ export const AuthProvider = ({ children }) => {
     assignSubjectToFaculty,
     markAttendance,
     getRecentAttendance,
+    getStudentAttendance,
     isAuthenticated: !!currentUser,
   };
 
