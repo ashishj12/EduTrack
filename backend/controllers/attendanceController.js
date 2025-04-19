@@ -1,19 +1,109 @@
 import Attendance from "../models/attendance.model.js";
 import Student from '../models/student.model.js';
 import Subject from '../models/subject.model.js';
-import axios from 'axios';
-import FormData from 'form-data';
-import fs from 'fs/promises';  // Using promises API for better async handling
-import { existsSync } from 'fs';
-// import logger from '../utils/logger.js';
+import Faculty from "../models/faculty.model.js";
 import dotenv from 'dotenv';
+import axios from 'axios';
+import path from 'path';
+import FormData from 'form-data';
+
+import { fileURLToPath } from 'url';
+import { readFile, unlink } from 'fs/promises';
+import { existsSync } from 'fs';
+import { google } from 'googleapis';
+
+// Setup file paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const keys = JSON.parse(await readFile(path.join(__dirname, '../credentials.json'), 'utf8'));
 
 dotenv.config();
 
+// Google Sheets setup
+const setupGoogleSheets = async () => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const client = await auth.getClient();
+    return google.sheets({ version: 'v4', auth: client });
+  } catch (error) {
+    console.error("Error setting up Google Sheets:", error);
+    throw new Error("Failed to initialize Google Sheets API");
+  }
+};
+
+// Create or update a sheet for a subject
+const createOrUpdateSubjectSheet = async (sheetsApi, subjectDetails, attendanceData) => {
+  try {
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const sheetTitle = `${subjectDetails.subjectName}-${subjectDetails.batch}-${subjectDetails.semester}`;
+
+    const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+    const existingSheet = spreadsheet.data.sheets.find(sheet => sheet.properties.title === sheetTitle);
+
+    if (!existingSheet) {
+      await sheetsApi.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            addSheet: {
+              properties: { title: sheetTitle }
+            }
+          }]
+        }
+      });
+    }
+
+    await sheetsApi.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetTitle}!A1:E1`,
+      valueInputOption: 'RAW',
+      resource: { values: [["Roll Number", "Name", "Date", "Present/Absent", "Faculty"]] }
+    });
+
+    const formattedDate = new Date(attendanceData.date).toLocaleDateString();
+    const values = attendanceData.students.map(student => [
+      student.studentId.username,
+      student.studentId.name,
+      formattedDate,
+      student.present ? "Present" : "Absent",
+      attendanceData.faculty.name
+    ]);
+
+    await sheetsApi.spreadsheets.values.append({
+      spreadsheetId,
+      range: `${sheetTitle}!A2:E`,
+      valueInputOption: 'RAW',
+      resource: { values }
+    });
+    
+    return { spreadsheetId, sheetTitle };
+  } catch (error) {
+    console.error("Error with Google Sheets operation:", error);
+    throw new Error("Failed to create or update Google Sheets");
+  }
+};
+
+// Generate a shareable link for a Google Sheet
+const getSheetShareableLink = (spreadsheetId, sheetTitle) => {
+  if (!spreadsheetId || !sheetTitle) {
+    throw new Error("Invalid Spreadsheet ID or Sheet Title");
+  }
+  return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0&range=${encodeURIComponent(sheetTitle)}`;
+};
+
+// Helper to safely get string ID from MongoDB object or string
+const getStringId = (objectOrString) => {
+  if (!objectOrString) return null;
+  return typeof objectOrString === 'string'
+    ? objectOrString
+    : (objectOrString._id ? objectOrString._id.toString() : objectOrString.toString());
+};
 
 export const markAttendance = async (req, res) => {
   try {
-    // Check authentication and authorization
     const { userId, role } = req.user;
     if (!req.user || role !== "Faculty") {
       return res.status(403).json({ message: "Only faculty can mark attendance" });
@@ -24,14 +114,14 @@ export const markAttendance = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    //  Check if the subject exists and faculty is authorized
+    // Check if the subject exists and faculty is authorized
     const subject = await Subject.findById(subjectId);
     if (!subject) {
       return res.status(404).json({ message: "Subject not found" });
     }
 
-    const facultyId = userId?.toString();
-    const subjectTaughtBy = subject.taughtBy?.toString();
+    const facultyId = getStringId(userId);
+    const subjectTaughtBy = getStringId(subject.taughtBy);
 
     if (!subjectTaughtBy || facultyId !== subjectTaughtBy) {
       return res.status(403).json({ message: "Unauthorized for this subject" });
@@ -47,11 +137,11 @@ export const markAttendance = async (req, res) => {
     let recognizedRollNumbers = [];
     try {
       const formData = new FormData();
-      
+
       // Handle file upload based on source 
       if (req.file?.path && existsSync(req.file.path)) {
         try {
-          const fileBuffer = await fs.readFile(req.file.path);
+          const fileBuffer = await readFile(req.file.path);
           formData.append("file", fileBuffer, req.file.originalname || "attendance.jpg");
         } catch (fileReadErr) {
           console.error("Error reading uploaded file:", fileReadErr);
@@ -59,9 +149,9 @@ export const markAttendance = async (req, res) => {
         }
       } else if (req.uploadedFileUrl) {
         try {
-          const response = await axios.get(req.uploadedFileUrl, { 
+          const response = await axios.get(req.uploadedFileUrl, {
             responseType: "arraybuffer",
-            timeout: 10000 
+            timeout: 10000
           });
           formData.append("file", Buffer.from(response.data), "attendance.jpg");
         } catch (downloadErr) {
@@ -75,14 +165,13 @@ export const markAttendance = async (req, res) => {
       // Call ML API with timeout and error handling
       const mlApiUrl = process.env.FACE_RECOGNITION_API_URL || "http://localhost:5000";
       console.log("Calling ML API at:", mlApiUrl);
-      
       try {
         const headers = formData.getHeaders ? formData.getHeaders() : {};
-        const mlResponse = await axios.post(`${mlApiUrl}/predict/`, formData, { 
+        const mlResponse = await axios.post(`${mlApiUrl}/predict/`, formData, {
           headers,
-          timeout: 30000 
+          timeout: 30000
         });
-        
+
         console.log("ML API response:", mlResponse.data);
         recognizedRollNumbers = (mlResponse.data?.result || []).map(r => r.toLowerCase());
       } catch (mlApiErr) {
@@ -91,20 +180,19 @@ export const markAttendance = async (req, res) => {
       }
     } catch (imageProcessingErr) {
       console.error("Error processing image:", imageProcessingErr);
-      return res.status(422).json({ 
-        message: "Failed to process attendance image", 
-        error: imageProcessingErr.message 
+      return res.status(422).json({
+        message: "Failed to process attendance image",
+        error: imageProcessingErr.message
       });
     }
 
     // Fetch students and mark attendance
     try {
       // Fetch all students for the batch and semester
-      const students = await Student.find({ semester, batch }).select("_id username");
-      
+      const students = await Student.find({ semester, batch }).select("_id username name");
       if (students.length === 0) {
-        return res.status(404).json({ 
-          message: "No students found for the specified batch and semester" 
+        return res.status(404).json({
+          message: "No students found for the specified batch and semester"
         });
       }
 
@@ -117,10 +205,13 @@ export const markAttendance = async (req, res) => {
         present: recognizedRollNumbers.includes(student.username.toLowerCase()),
       }));
 
-      //  Create and save attendance record
+      // Fetch faculty info for Google Sheets
+      const faculty = await Faculty.findById(userId).select("name username");
+
+      // Create and save attendance record
       const attendanceRecord = new Attendance({
         subject: subjectId,
-        date: date ? new Date(date) : new Date(),
+        date: (date && !isNaN(new Date(date).getTime())) ? new Date(date) : new Date(),
         batch,
         semester,
         faculty: userId,
@@ -132,45 +223,459 @@ export const markAttendance = async (req, res) => {
 
       await attendanceRecord.save();
 
-      //  Increment class count for the subject
+      // Increment class count for the subject
       await Subject.findByIdAndUpdate(subjectId, { $inc: { totalClasses: 1 } });
 
-      //  Clean up uploaded file if exists locally
+      // Clean up uploaded file if exists locally
       if (req.file?.path && existsSync(req.file.path)) {
         try {
-          await fs.unlink(req.file.path);
+          await unlink(req.file.path);
         } catch (unlinkErr) {
           console.warn("Failed to delete temporary file:", unlinkErr.message);
           // Non-critical error, continue processing
         }
       }
 
-      //  Return success response with summary
-      return res.status(201).json({
-        message: "Attendance marked successfully",
-        attendanceRecords: {
-          total: students.length,
-          present: attendanceData.filter(s => s.present).length,
-          absent: attendanceData.filter(s => !s.present).length,
-          attendanceId: attendanceRecord._id,
-          imageUrl,
+      // Prepare Google Sheets integration
+      try {
+        const sheetsApi = await setupGoogleSheets();
+
+        // Format data for Google Sheets
+        const populatedAttendance = await Attendance.findById(attendanceRecord._id)
+          .populate('subject', 'subjectName subjectSem')
+          .populate('faculty', 'name username')
+          .populate('students.studentId', 'name username');
+
+        // Update Google Sheets with attendance data
+        const subjectDetails = {
+          subjectName: subject.subjectName,
+          batch,
+          semester
+        };
+
+        const sheetInfo = await createOrUpdateSubjectSheet(sheetsApi, subjectDetails, populatedAttendance);
+        const sheetLink = getSheetShareableLink(sheetInfo.spreadsheetId, sheetInfo.sheetTitle);
+
+        // Update attendance record with sheet link
+        attendanceRecord.sheetUrl = sheetLink;
+        await attendanceRecord.save();
+
+        // NEW CODE: Update personal sheets for all students
+        const studentSheetUpdates = [];
+        const spreadsheetId = process.env.SPREADSHEET_ID;
+
+        // Process each student's personal sheet
+        for (const student of students) {
+          try {
+            const studentId = student._id.toString();
+            const sanitizeTitle = (title) => title.replace(/[\\\/:*?"<>|]/g, '-');
+            const personalSheetTitle = sanitizeTitle(`${student.username}-${student.name}`);
+
+            // Check if sheet exists
+            const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+            let existingSheet = spreadsheet.data.sheets.find(
+              sheet => sheet.properties.title === personalSheetTitle
+            );
+
+            // Get all attendance records for this student
+            const attendanceRecords = await Attendance.find({ 'students.studentId': studentId })
+              .populate('subject', 'subjectName subjectSem')
+              .populate('faculty', 'name username')
+              .sort({ date: 1 });
+
+            const values = attendanceRecords.map(record => {
+              const studentRecord = record.students.find(s => {
+                const sId = typeof s.studentId === 'object' ? s.studentId.toString() : s.studentId;
+                return sId === studentId;
+              });
+
+              return [
+                record.subject?.subjectName || "Unknown Subject",
+                new Date(record.date).toLocaleDateString(),
+                studentRecord?.present ? "Present" : "Absent",
+                record.faculty?.name || "Unknown Faculty",
+                record.batch || "N/A",
+                record.semester || "N/A"
+              ];
+            });
+
+            // Create or update sheet
+            if (!existingSheet) {
+              // Create new sheet
+              await sheetsApi.spreadsheets.batchUpdate({
+                spreadsheetId,
+                resource: {
+                  requests: [{
+                    addSheet: {
+                      properties: {
+                        title: personalSheetTitle,
+                      }
+                    }
+                  }]
+                }
+              });
+
+              // Add headers
+              await sheetsApi.spreadsheets.values.update({
+                spreadsheetId,
+                range: `${personalSheetTitle}!A1:F1`,
+                valueInputOption: 'RAW',
+                resource: {
+                  values: [["Subject", "Date", "Present/Absent", "Faculty", "Batch", "Semester"]]
+                }
+              });
+
+              // Insert data
+              if (values.length > 0) {
+                await sheetsApi.spreadsheets.values.append({
+                  spreadsheetId,
+                  range: `${personalSheetTitle}!A2:F`,
+                  valueInputOption: 'RAW',
+                  resource: { values }
+                });
+              }
+            } else {
+              // Update existing sheet
+              const sheetId = existingSheet.properties.sheetId;
+
+              const response = await sheetsApi.spreadsheets.values.get({
+                spreadsheetId,
+                range: `${personalSheetTitle}!A:F`,
+              });
+
+              const rowCount = response.data.values ? response.data.values.length : 1;
+
+              if (rowCount > 1) {
+                await sheetsApi.spreadsheets.batchUpdate({
+                  spreadsheetId,
+                  resource: {
+                    requests: [{
+                      deleteDimension: {
+                        range: {
+                          sheetId,
+                          dimension: "ROWS",
+                          startIndex: 1,
+                          endIndex: rowCount
+                        }
+                      }
+                    }]
+                  }
+                });
+              }
+
+              if (values.length > 0) {
+                await sheetsApi.spreadsheets.values.append({
+                  spreadsheetId,
+                  range: `${personalSheetTitle}!A2:F`,
+                  valueInputOption: 'RAW',
+                  resource: { values }
+                });
+              }
+            }
+
+            const sheetLink = getSheetShareableLink(spreadsheetId, personalSheetTitle);
+            studentSheetUpdates.push({
+              studentId: studentId,
+              rollNumber: student.username,
+              name: student.name,
+              sheetUrl: sheetLink
+            });
+          } catch (studentSheetError) {
+            console.error(`Error updating sheet for student ${student.username}:`, studentSheetError);
+            // Continue with other students even if one fails
+          }
         }
-      });
+
+        // Return success response with summary
+        return res.status(201).json({
+          message: "Attendance marked successfully",
+          attendanceRecords: {
+            total: students.length,
+            present: attendanceData.filter(s => s.present).length,
+            absent: attendanceData.filter(s => !s.present).length,
+            attendanceId: attendanceRecord._id,
+            imageUrl,
+            sheetUrl: sheetLink
+          },
+          studentSheetsUpdated: studentSheetUpdates.length,
+          studentSheets: studentSheetUpdates
+        });
+      } catch (sheetError) {
+        console.error("Google Sheets error:", sheetError);
+        // Continue with response, but inform of Sheet error
+        return res.status(201).json({
+          message: "Attendance marked successfully (Google Sheets update failed)",
+          attendanceRecords: {
+            total: students.length,
+            present: attendanceData.filter(s => s.present).length,
+            absent: attendanceData.filter(s => !s.present).length,
+            attendanceId: attendanceRecord._id,
+            imageUrl,
+            sheetError: sheetError.message
+          }
+        });
+      }
     } catch (dbError) {
       console.error("Database error in attendance marking:", dbError);
-      return res.status(500).json({ 
-        message: "Failed to record attendance in database", 
-        error: dbError.message 
+      return res.status(500).json({
+        message: "Failed to record attendance in database",
+        error: dbError.message
       });
     }
   } catch (error) {
     console.error("Error marking attendance:", error);
-    return res.status(500).json({ 
-      message: "Something went wrong processing attendance", 
-      error: error.message 
+    return res.status(500).json({
+      message: "Something went wrong processing attendance",
+      error: error.message
     });
   }
 };
+
+// Get Google Sheet link for a subject
+export const getSubjectAttendanceSheet = async (req, res) => {
+  try {
+    const { userId, role } = req.user;
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    // Only faculty, admin and students can access subject sheets
+    if (role !== 'Faculty' && role !== 'Admin' && role !== 'Student') {
+      return res.status(403).json({ message: "Unauthorized to view attendance sheets" });
+    }
+
+    const { subjectId, batch, semester } = req.params;
+
+    if (!subjectId || !batch || !semester) {
+      return res.status(400).json({ message: "Subject ID, batch, and semester are required" });
+    }
+
+    // Check if subject exists
+    const subject = await Subject.findById(subjectId);
+    if (!subject) {
+      return res.status(404).json({ message: "Subject not found" });
+    }
+
+    // Faculty can only view their subjects
+    if (role === 'Faculty') {
+      const facultyId = getStringId(userId);
+      const subjectTaughtBy = getStringId(subject.taughtBy);
+
+      if (facultyId !== subjectTaughtBy) {
+        return res.status(403).json({ message: "You are not authorized to view this subject's attendance" });
+      }
+    }
+
+    // Students can only view subjects in their batch and semester
+    if (role === 'Student') {
+      const student = await Student.findById(userId);
+      if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+
+      if (student.batch !== batch || student.semester !== semester) {
+        return res.status(403).json({
+          message: "You can only view attendance for your batch and semester"
+        });
+      }
+    }
+
+    // Setup Google Sheets
+    const sheetsApi = await setupGoogleSheets();
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+
+    // Format sheet title
+    const sheetTitle = `${subject.subjectName}-${batch}-${semester}`;
+
+    // Check if sheet exists
+    const spreadsheet = await sheetsApi.spreadsheets.get({
+      spreadsheetId,
+    });
+
+    const existingSheet = spreadsheet.data.sheets.find(
+      sheet => sheet.properties.title === sheetTitle
+    );
+
+    if (!existingSheet) {
+      return res.status(404).json({
+        message: "No attendance sheet found for this subject"
+      });
+    }
+
+    // Generate shareable link
+    const sheetLink = getSheetShareableLink(spreadsheetId, sheetTitle);
+
+    return res.status(200).json({
+      message: "Attendance sheet found",
+      data: {
+        subject: subject.subjectName,
+        batch,
+        semester,
+        sheetUrl: sheetLink
+      }
+    });
+
+  } catch (error) {
+    console.error("Error retrieving subject attendance sheet:", error);
+    return res.status(500).json({ message: "Something went wrong", error: error.message });
+  }
+};
+
+// Get personal attendance sheet for a student
+export const getStudentPersonalSheet = async (req, res) => {
+  try {
+    // 1. Check authentication
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const { userId, role } = req.user;
+    const requestedStudentId = req.query.userId;
+
+    if (!requestedStudentId) {
+      return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    // 2. Role-based access
+    if (role === 'Student' && userId !== requestedStudentId) {
+      return res.status(403).json({ message: "You can only access your own attendance records" });
+    }
+
+    // 3. Fetch student
+    const student = await Student.findById(requestedStudentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // 4. Set up Sheets API
+    const sheetsApi = await setupGoogleSheets();
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+
+    const sanitizeTitle = (title) => title.replace(/[\\\/:*?"<>|]/g, '-');
+    const personalSheetTitle = sanitizeTitle(`${student.username}-${student.name}`);
+
+    // 5. Check if sheet exists
+    const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+
+    let existingSheet = spreadsheet.data.sheets.find(
+      sheet => sheet.properties.title === personalSheetTitle
+    );
+
+    // 6. Fetch attendance records
+    const attendanceRecords = await Attendance.find({ 'students.studentId': requestedStudentId })
+      .populate('subject', 'subjectName subjectSem')
+      .populate('faculty', 'name username')
+      .sort({ date: 1 });
+
+    const values = attendanceRecords.map(record => {
+      const studentRecord = record.students.find(s => {
+        const sId = typeof s.studentId === 'object' ? s.studentId.toString() : s.studentId;
+        return sId === requestedStudentId;
+      });
+
+      return [
+        record.subject?.subjectName || "Unknown Subject",
+        new Date(record.date).toLocaleDateString(),
+        studentRecord?.present ? "Present" : "Absent",
+        record.faculty?.name || "Unknown Faculty",
+        record.batch || "N/A",
+        record.semester || "N/A"
+      ];
+    });
+
+    // 7. Sheet does not exist - create and insert data
+    if (!existingSheet) {
+      await sheetsApi.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            addSheet: {
+              properties: {
+                title: personalSheetTitle,
+              }
+            }
+          }]
+        }
+      });
+
+      // Add headers
+      await sheetsApi.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${personalSheetTitle}!A1:F1`,
+        valueInputOption: 'RAW',
+        resource: {
+          values: [["Subject", "Date", "Present/Absent", "Faculty", "Batch", "Semester"]]
+        }
+      });
+
+      // Insert data if any
+      if (values.length > 0) {
+        await sheetsApi.spreadsheets.values.append({
+          spreadsheetId,
+          range: `${personalSheetTitle}!A2:F`,
+          valueInputOption: 'RAW',
+          resource: { values }
+        });
+      }
+    } else {
+      // 8. Sheet exists - update it
+      const sheetId = existingSheet.properties.sheetId;
+
+      const response = await sheetsApi.spreadsheets.values.get({
+        spreadsheetId,
+        range: `${personalSheetTitle}!A:F`,
+      });
+
+      const rowCount = response.data.values ? response.data.values.length : 1;
+
+      if (rowCount > 1) {
+        await sheetsApi.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource: {
+            requests: [{
+              deleteDimension: {
+                range: {
+                  sheetId,
+                  dimension: "ROWS",
+                  startIndex: 1,
+                  endIndex: rowCount
+                }
+              }
+            }]
+          }
+        });
+      }
+
+      if (values.length > 0) {
+        await sheetsApi.spreadsheets.values.append({
+          spreadsheetId,
+          range: `${personalSheetTitle}!A2:F`,
+          valueInputOption: 'RAW',
+          resource: { values }
+        });
+      }
+    }
+
+    // 9. Get shareable link
+    const sheetLink = getSheetShareableLink(spreadsheetId, personalSheetTitle);
+
+    return res.status(200).json({
+      message: "Student attendance sheet generated successfully",
+      data: {
+        studentName: student.name,
+        rollNumber: student.username,
+        batch: student.batch,
+        semester: student.semester,
+        sheetUrl: sheetLink
+      }
+    });
+
+  } catch (error) {
+    console.error("Error generating student personal sheet:", error);
+    return res.status(500).json({ message: "Something went wrong", error: error.message });
+  }
+};
+
 
 // Get all attendance records
 export const getAllAttendance = async (req, res) => {
@@ -199,7 +704,7 @@ export const getAllAttendance = async (req, res) => {
     if (subject) query.subject = subject;
     if (batch) query.batch = batch;
     if (semester) query.semester = semester;
-    
+
     // Date range filter
     if (startDate || endDate) {
       query.date = {};
@@ -220,9 +725,9 @@ export const getAllAttendance = async (req, res) => {
     // Calculate summary statistics
     const summary = {
       total: attendanceRecords.length,
-      presentCount: attendanceRecords.reduce((acc, record) => 
+      presentCount: attendanceRecords.reduce((acc, record) =>
         acc + record.students.filter(s => s.present).length, 0),
-      absentCount: attendanceRecords.reduce((acc, record) => 
+      absentCount: attendanceRecords.reduce((acc, record) =>
         acc + record.students.filter(s => !s.present).length, 0)
     };
 
@@ -241,14 +746,14 @@ export const getAllAttendance = async (req, res) => {
   }
 };
 
-// Get all attendance records by id
+// Get attendance record by ID
 export const getAttendanceById = async (req, res) => {
   try {
     const { userId, role } = req.user;
     if (!req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     if (!req.params.id) {
       return res.status(400).json({ message: "Attendance ID is required" });
     }
@@ -265,27 +770,17 @@ export const getAttendanceById = async (req, res) => {
     // Authorization check
     if (role === 'Student') {
       // Students can only view attendance records that include them
-      const studentRecord = attendance.students.find(s => {
-        if (!s.studentId) return false;
-        
-        const studentIdStr = typeof s.studentId === 'string' 
-          ? s.studentId 
-          : (s.studentId._id ? s.studentId._id.toString() : null);
-              
-        return studentIdStr === userId;
-      });
-      
+      const studentRecord = attendance.students.find(s => 
+        getStringId(s.studentId) === userId
+      );
+
       if (!studentRecord) {
         return res.status(403).json({ message: "You are not part of this attendance record" });
       }
     } else if (role === 'Faculty') {
       // Faculty can only view their own attendance records
-      const attendanceFacultyId = attendance.faculty 
-        ? (typeof attendance.faculty === 'string' 
-            ? attendance.faculty 
-            : attendance.faculty._id.toString())
-        : null;
-                
+      const attendanceFacultyId = getStringId(attendance.faculty);
+
       if (attendanceFacultyId && attendanceFacultyId !== userId) {
         return res.status(403).json({ message: "You are not authorized to view this attendance record" });
       }
@@ -309,24 +804,41 @@ export const getStudentAttendance = async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     // Check if the requesting user is the same student or has appropriate role
     const requestedStudentId = req.query.studentId || userId;
-    
+
     if (!requestedStudentId) {
       return res.status(400).json({ message: "Student ID is required" });
     }
-    
+
     if (role === 'Student' && userId !== requestedStudentId) {
       return res.status(403).json({ message: "You can only access your own attendance records" });
     }
-    
+
     // Get the student to ensure they exist
     const student = await Student.findById(requestedStudentId);
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    
+
+    // Generate Google Sheet for student attendance
+    let sheetUrl = null;
+    try {
+      // Setup Google Sheets
+      const sheetsApi = await setupGoogleSheets();
+      const spreadsheetId = process.env.SPREADSHEET_ID;
+
+      // Format sheet title for personal sheet
+      const personalSheetTitle = `${student.username}-${student.name}`;
+
+      // Generate shareable link
+      sheetUrl = getSheetShareableLink(spreadsheetId, personalSheetTitle);
+    } catch (sheetError) {
+      console.error("Error generating Google Sheet link:", sheetError);
+      // Continue without the sheet URL
+    }
+
     // Build query based on parameters
     const { subject, semester, startDate, endDate } = req.query;
     const query = { 'students.studentId': requestedStudentId };
@@ -352,14 +864,10 @@ export const getStudentAttendance = async (req, res) => {
 
     // Process attendance data
     const attendanceData = attendanceRecords.map(record => {
-      const studentRecord = record.students.find(s => {
-        const sId = typeof s.studentId === 'string' 
-          ? s.studentId 
-          : s.studentId.toString();
-          
-        return sId === requestedStudentId;
-      });
-      
+      const studentRecord = record.students.find(s => 
+        getStringId(s.studentId) === requestedStudentId
+      );
+
       return {
         _id: record._id,
         date: record.date,
@@ -375,9 +883,9 @@ export const getStudentAttendance = async (req, res) => {
     const subjectStats = {};
     attendanceData.forEach(record => {
       if (!record.subject || !record.subject._id) return;
-      
+
       const subjectId = record.subject._id.toString();
-        
+
       if (!subjectStats[subjectId]) {
         subjectStats[subjectId] = {
           subject: record.subject,
@@ -404,7 +912,7 @@ export const getStudentAttendance = async (req, res) => {
     // Calculate overall statistics
     const totalClasses = attendanceData.length;
     const attendedClasses = attendanceData.filter(record => record.present).length;
-    const attendancePercentage = totalClasses > 0 
+    const attendancePercentage = totalClasses > 0
       ? parseFloat((attendedClasses / totalClasses * 100).toFixed(2))
       : 0;
 
@@ -426,7 +934,8 @@ export const getStudentAttendance = async (req, res) => {
           },
           subjectWise: Object.values(subjectStats)
         },
-        attendanceRecords: attendanceData
+        attendanceRecords: attendanceData,
+        sheetUrl: sheetUrl
       }
     });
 
@@ -436,14 +945,14 @@ export const getStudentAttendance = async (req, res) => {
   }
 };
 
-//update attendance
+// Update attendance
 export const updateAttendance = async (req, res) => {
   try {
     const { userId, role } = req.user;
     if (!req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     const { students } = req.body;
     const attendanceId = req.params.id;
 
@@ -457,7 +966,10 @@ export const updateAttendance = async (req, res) => {
     }
 
     // Find the attendance record
-    const attendance = await Attendance.findById(attendanceId);
+    const attendance = await Attendance.findById(attendanceId)
+      .populate('subject', 'subjectName')
+      .populate('faculty', 'name username')
+      .populate('students.studentId', 'name username');
 
     if (!attendance) {
       return res.status(404).json({ message: "Attendance record not found" });
@@ -469,50 +981,131 @@ export const updateAttendance = async (req, res) => {
     }
 
     // Authorization check
-    const attendanceFacultyId = typeof attendance.faculty === 'string'
-      ? attendance.faculty
-      : attendance.faculty.toString();
-    
+    const attendanceFacultyId = getStringId(attendance.faculty);
+
     if (attendanceFacultyId !== userId && role !== 'Admin') {
       return res.status(403).json({ message: "You are not authorized to update this attendance record" });
     }
 
-    // Update student attendance statuses
+    // Track changes for Google Sheets update
+    const changes = [];
+
     for (const update of students) {
       if (!update.studentId) continue;
-      
+
       // Convert student ID to string for comparison
-      const updateStudentId = typeof update.studentId === 'string'
-        ? update.studentId
-        : update.studentId.toString();
-      
-      const studentIndex = attendance.students.findIndex(s => {
-        if (!s.studentId) return false;
-        
-        const sId = typeof s.studentId === 'string'
-          ? s.studentId
-          : s.studentId.toString();
-          
-        return sId === updateStudentId;
-      });
+      const updateStudentId = getStringId(update.studentId);
+
+      const studentIndex = attendance.students.findIndex(s => 
+        getStringId(s.studentId) === updateStudentId
+      );
 
       if (studentIndex !== -1) {
-        attendance.students[studentIndex].present = !!update.present; // Convert to boolean
+        const newPresent = !!update.present;
+        const oldPresent = attendance.students[studentIndex].present;
+
+        if (newPresent !== oldPresent) {
+          // Status changed, track for Google Sheets update
+          changes.push({
+            studentId: update.studentId,
+            oldStatus: oldPresent ? "Present" : "Absent",
+            newStatus: newPresent ? "Present" : "Absent"
+          });
+        }
+
+        // Update status
+        attendance.students[studentIndex].present = newPresent;
       } else {
         // Add student if not found
         attendance.students.push({
           studentId: update.studentId,
           present: !!update.present
         });
+
+        // Track new addition
+        changes.push({
+          studentId: update.studentId,
+          oldStatus: "N/A",
+          newStatus: update.present ? "Present" : "Absent"
+        });
       }
     }
 
     // Save the updated attendance
     await attendance.save();
-    
+
     // Calculate counts for response
     const totalPresent = attendance.students.filter(s => s.present).length;
     const totalAbsent = attendance.students.filter(s => !s.present).length;
+
+    // Update Google Sheets if there are changes
+    if (changes.length > 0) {
+      try {
+        const sheetsApi = await setupGoogleSheets();
+        const spreadsheetId = process.env.SPREADSHEET_ID;
+
+        // Format sheet title
+        const sheetTitle = `${attendance.subject.subjectName}-${attendance.batch}-${attendance.semester}`;
+
+        // Check if sheet exists
+        const spreadsheet = await sheetsApi.spreadsheets.get({
+          spreadsheetId,
+        });
+
+        const existingSheet = spreadsheet.data.sheets.find(
+          sheet => sheet.properties.title === sheetTitle
+        );
+
+        if (existingSheet) {
+          // Get current sheet data
+          const response = await sheetsApi.spreadsheets.values.get({
+            spreadsheetId,
+            range: `${sheetTitle}!A:E`,
+          });
+
+          const sheetData = response.data.values || [];
+
+          // Format date for comparison
+          const formattedDate = new Date(attendance.date).toLocaleDateString();
+
+          // Look for rows with matching date and update them
+          for (const change of changes) {
+            const studentInfo = attendance.students.find(s => 
+              getStringId(s.studentId) === getStringId(change.studentId)
+            );
+
+            if (!studentInfo || !studentInfo.studentId) continue;
+
+            const studentUsername = typeof studentInfo.studentId === 'string'
+              ? studentInfo.studentId
+              : studentInfo.studentId.username;
+
+            // Find rows that match this student and date
+            for (let i = 1; i < sheetData.length; i++) {
+              const row = sheetData[i];
+              if (row[0] === studentUsername && row[2] === formattedDate) {
+                // Update this row's present/absent status
+                await sheetsApi.spreadsheets.values.update({
+                  spreadsheetId,
+                  range: `${sheetTitle}!D${i + 1}`,
+                  valueInputOption: 'RAW',
+                  resource: {
+                    values: [[studentInfo.present ? "Present" : "Absent"]]
+                  }
+                });
+                break;
+              }
+            }
+          }
+
+          // Also update personal student sheets
+          await updatePersonalStudentSheets(sheetsApi, spreadsheetId, changes, attendance);
+        }
+      } catch (sheetsError) {
+        console.error("Error updating Google Sheets:", sheetsError);
+        // Continue without failing the API response
+      }
+    }
 
     return res.status(200).json({
       message: "Attendance updated successfully",
@@ -520,7 +1113,8 @@ export const updateAttendance = async (req, res) => {
         attendanceId: attendance._id,
         totalPresent,
         totalAbsent,
-        totalStudents: attendance.students.length
+        totalStudents: attendance.students.length,
+        changes: changes.length
       }
     });
 
@@ -530,20 +1124,20 @@ export const updateAttendance = async (req, res) => {
   }
 };
 
-
-//delete attendance
+// Delete attendance
 export const deleteAttendance = async (req, res) => {
   try {
     const { userId, role } = req.user;
     if (!req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     if (!req.params.id) {
       return res.status(400).json({ message: "Attendance ID is required" });
     }
-    
-    const attendance = await Attendance.findById(req.params.id);
+
+    const attendance = await Attendance.findById(req.params.id)
+      .populate('subject', 'subjectName');
 
     if (!attendance) {
       return res.status(404).json({ message: "Attendance record not found" });
@@ -555,20 +1149,30 @@ export const deleteAttendance = async (req, res) => {
     }
 
     // Authorization check
-    const attendanceFacultyId = typeof attendance.faculty === 'string'
-      ? attendance.faculty
-      : attendance.faculty.toString();
-    
+    const attendanceFacultyId = getStringId(attendance.faculty);
+
     if (role !== 'Admin' && attendanceFacultyId !== userId) {
       return res.status(403).json({ message: "You are not authorized to delete this attendance record" });
     }
 
     // Store subject ID before deletion for decrementing class count
     const subjectId = attendance.subject;
+    const subjectName = attendance.subject.subjectName;
+    const batch = attendance.batch;
+    const semester = attendance.semester;
+    const attendanceDate = new Date(attendance.date).toLocaleDateString();
+
+    // Try to update Google Sheets to mark this attendance as deleted
+    try {
+      await markAttendanceAsDeleted(attendance, attendanceDate, subjectName);
+    } catch (sheetsError) {
+      console.error("Error updating Google Sheets for deletion:", sheetsError);
+      // Continue without failing the API response
+    }
 
     // Delete the attendance record
     await Attendance.findByIdAndDelete(req.params.id);
-    
+
     // Update the Subject model to decrement totalClasses (with null check)
     if (subjectId) {
       await Subject.findByIdAndUpdate(subjectId, { $inc: { totalClasses: -1 } });
@@ -587,3 +1191,83 @@ export const deleteAttendance = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
+
+// Helper function to sync MongoDB attendance data with Google Sheets
+export const syncAllAttendanceToSheets = async (req, res) => {
+  try {
+    const { role } = req.user;
+    if (!req.user || role !== 'Admin') {
+      return res.status(403).json({ message: "Only administrators can perform full synchronization" });
+    }
+
+    // Setup Google Sheets
+    const sheetsApi = await setupGoogleSheets();
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+
+    // Get all subjects with attendance records
+    const subjects = await Subject.find().select('subjectName');
+
+    // Get unique batches and semesters with attendance records
+    const attendanceAggregation = await Attendance.aggregate([
+      { $group: { _id: { batch: "$batch", semester: "$semester", subjectId: "$subject" } } }
+    ]);
+
+    // Create mapping of subject ID to name
+    const subjectMap = {};
+    subjects.forEach(subject => {
+      subjectMap[subject._id.toString()] = subject.subjectName;
+    });
+
+    // Process each unique combination
+    let processedCount = 0;
+    let errorCount = 0;
+
+    for (const item of attendanceAggregation) {
+      const { batch, semester, subjectId } = item._id;
+      const subjectName = subjectMap[subjectId.toString()];
+
+      if (!subjectName || !batch || !semester) continue;
+
+      try {
+        await syncSubjectSheet(sheetsApi, spreadsheetId, subjectId, subjectName, batch, semester);
+        processedCount++;
+      } catch (error) {
+        console.error(`Error syncing ${subjectMap[subjectId]}-${batch}-${semester}:`, error);
+        errorCount++;
+      }
+    }
+
+    // Also sync student personal sheets
+    const students = await Student.find().select('_id username name batch semester');
+    let studentProcessed = 0;
+
+    for (const student of students) {
+      try {
+        await syncStudentPersonalSheet(sheetsApi, spreadsheetId, student);
+        studentProcessed++;
+      } catch (error) {
+        console.error(`Error creating personal sheet for ${student.username}:`, error);
+        errorCount++;
+      }
+    }
+
+    return res.status(200).json({
+      message: "Synchronization completed",
+      data: {
+        subjects: {
+          processed: processedCount,
+          errors: errorCount
+        },
+        students: {
+          processed: studentProcessed,
+          errors: students.length - studentProcessed
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in synchronization process:", error);
+    return res.status(500).json({ message: "Synchronization failed", error: error.message });
+  }
+};
+

@@ -64,3 +64,4 @@ facultySchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 export const Faculty = mongoose.model("Faculty", facultySchema);
+export default Faculty;

@@ -5,3 +5,4 @@ node_modules
 password.txt.env
 dropCollection.js
 uploads
+credentials.json

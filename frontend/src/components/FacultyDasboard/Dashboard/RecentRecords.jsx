@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Loader } from "lucide-react";
+import { Loader, ExternalLink } from "lucide-react";
 import { useAuth } from "../../../context/authContext";
 
 export default function RecentRecords() {
@@ -56,6 +56,39 @@ export default function RecentRecords() {
       if (subject.subjectName) return subject.subjectName;
     }
     return "Subject Name Unavailable";
+  };
+
+  // Function to handle subject click and open Google Sheets
+  const handleSubjectClick = (record) => {
+    // Check if record has a sheetUrl directly
+    if (record.sheetUrl) {
+      window.open(record.sheetUrl, '_blank');
+      return;
+    }
+
+    // Based on the controller code, the URL would be constructed as:
+    // Spreadsheet ID is stored in env, but we can open the sheet based on naming convention
+    const subjectName = getSubjectName(record.subject);
+    const batch = record.batch;
+    const semester = record.semester;
+    
+    // Try to open based on information we have in Google Sheets
+    // This assumes the sheets are named with this convention in Google Sheets
+    // This is a basic implementation - ideally you would directly use the URL from the API
+    if (subjectName && batch && semester) {
+      const spreadsheetId = import.meta.env.VITE_SPREADSHEET_ID; // If available in front-end
+      if (spreadsheetId) {
+        const sheetTitle = `${subjectName}-${batch}-${semester}`;
+        const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0&range=${encodeURIComponent(sheetTitle)}`;
+        window.open(sheetUrl, '_blank');
+      } else {
+        // If we don't have the spreadsheet ID in the front-end, 
+        // we would need to call an API endpoint to get the sheet URL
+        alert("Opening Google Sheets for: " + subjectName);
+      }
+    } else {
+      alert("Sheet information not available for this record");
+    }
   };
 
   if (loading) {
@@ -132,13 +165,18 @@ export default function RecentRecords() {
                   record.students?.filter((s) => s.present).length ||
                   record.presentCount ||
                   0;
+                const absentCount = totalStudents - presentCount;
                   
                 return (
                   <tr
                     key={record._id || index}
                     className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 md:px-6 py-4 text-sm">
+                    <td 
+                      className="px-4 md:px-6 py-4 text-sm text-blue-600 hover:text-blue-800 flex items-center cursor-pointer"
+                      onClick={() => handleSubjectClick(record)}
+                    >
                       {getSubjectName(record.subject)}
+                      <ExternalLink className="ml-1 w-4 h-4" />
                     </td>
                     <td className="px-4 md:px-6 py-4 text-sm">
                       {formatDate(record.date)}
@@ -148,12 +186,12 @@ export default function RecentRecords() {
                     </td>
                     <td className="px-4 md:px-6 py-4 text-sm">
                       <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                        {totalStudents - presentCount} 
+                        {presentCount}
                       </span>
                     </td>
                     <td className="px-4 md:px-6 py-4 text-sm">
                       <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                          {presentCount} 
+                        {absentCount}
                       </span>
                     </td>
                   </tr>

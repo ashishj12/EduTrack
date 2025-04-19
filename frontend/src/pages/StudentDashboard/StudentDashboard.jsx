@@ -6,7 +6,10 @@ import ScheduleCard from "../../components/StudentDashboard/ScheduleCard";
 import RecentClassCard from "../../components/StudentDashboard/RecentClassCard";
 import { useAuth } from "../../context/authContext";
 
-//Circular progress component to show attendance percentage
+const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID || "your-spreadsheet-id-here";
+console.log("Spreadsheet ID:", SPREADSHEET_ID);
+
+// Circular progress component to show attendance percentage
 const CircularProgress = ({ percentage }) => {
   const validPercentage = isNaN(percentage) ? 0 : Math.min(Math.max(0, percentage), 100);
   const radius = 30; 
@@ -15,11 +18,10 @@ const CircularProgress = ({ percentage }) => {
 
   return (
     <div className="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20">
-      {/* SVG with responsive viewBox to scale properly */}
       <svg
         className="w-full h-full transform -rotate-90"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 80 80" >
+        viewBox="0 0 80 80">
         <circle
           className="text-gray-200"
           strokeWidth="8"
@@ -48,19 +50,21 @@ const CircularProgress = ({ percentage }) => {
 };
 
 // AttendanceCard component to display attendance details
-const AttendanceCard = ({ subject, totalClasses, present, absent, rate }) => {
+const AttendanceCard = ({ subject, totalClasses, present, absent, rate, onClick }) => {
   const safeRate = isNaN(rate) ? 0 : Math.min(Math.max(0, rate), 100);
   const safeTotal = totalClasses || 0;
   const safePresent = present || 0;
   const safeAbsent = absent || 0;
-  
-  // Truncate long subject names
+
   const displaySubject = subject && subject.length > 25 
     ? `${subject.substring(0, 22)}...` 
     : subject || "Unknown Subject";
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+    <div 
+      className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      onClick={onClick} 
+    >
       <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 truncate">
         {displaySubject}
       </h3>
@@ -79,7 +83,6 @@ const AttendanceCard = ({ subject, totalClasses, present, absent, rate }) => {
             <span className="text-red-500 font-medium">Absent: {safeAbsent}</span>
           </div>
         </div>
-        {/* Wrapping CircularProgress to control its size and prevent overflow */}
         <div className="flex-shrink-0">
           <CircularProgress percentage={safeRate} />
         </div>
@@ -104,16 +107,13 @@ const StudentDashboard = () => {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Improved data fetching with retry mechanism and caching
   const fetchAttendanceData = useCallback(async () => {
     setSectionLoading(prev => ({ ...prev, attendance: true, recentClasses: true }));
     try {
-      // Check if data exists in session storage (simple cache)
       const cachedData = sessionStorage.getItem('attendanceData');
       const cacheTimestamp = sessionStorage.getItem('attendanceDataTimestamp');
       const now = Date.now();
-      
-      // Use cached data if it's less than 5 minutes old
+
       if (cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
         const parsedData = JSON.parse(cachedData);
         setAttendanceData(parsedData.subjectWiseData);
@@ -125,10 +125,9 @@ const StudentDashboard = () => {
         setIsLoading(false);
         return;
       }
-      
+
       const response = await getStudentAttendance();
       if (response && response.data) {
-        // Process attendance data for the cards with error handling
         const subjectWiseData = Array.isArray(response.data.statistics?.subjectWise) 
           ? response.data.statistics.subjectWise.map(subject => ({
               subject: subject.subject?.subjectName || "Unknown Subject",
@@ -141,10 +140,9 @@ const StudentDashboard = () => {
         
         setAttendanceData(subjectWiseData);
         
-        // Process recent classes data
         const recentClasses = Array.isArray(response.data.attendanceRecords)
           ? response.data.attendanceRecords
-              .slice(0, 4) // Get only the most recent 4 classes
+              .slice(0, 4) 
               .map(record => ({
                 subject: record.subject?.subjectName || "Unknown Subject",
                 date: record.date,
@@ -154,7 +152,6 @@ const StudentDashboard = () => {
           
         setRecentClassesData(recentClasses);
         
-        // Save to session storage
         sessionStorage.setItem('attendanceData', JSON.stringify({
           subjectWiseData,
           recentClasses
@@ -178,10 +175,9 @@ const StudentDashboard = () => {
     }
   }, [getStudentAttendance]);
 
-  // Fetch attendance data when component mounts with abort controller
   useEffect(() => {
     const controller = new AbortController();
-    
+
     async function loadData() {
       try {
         await fetchAttendanceData();
@@ -191,15 +187,14 @@ const StudentDashboard = () => {
         }
       }
     }
-    
+
     loadData();
-    
+
     return () => {
       controller.abort();
     };
   }, [fetchAttendanceData, retryCount]);
 
-  // Handle clicking outside of dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isProfileDropdownOpen && !event.target.closest('.profile-dropdown-container')) {
@@ -211,14 +206,12 @@ const StudentDashboard = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isProfileDropdownOpen]);
 
-  // Memoized scheduleData to prevent recreating on each render
   const scheduleData = useMemo(() => [
     { subject: "Big Data Analytics", time: "09:30 AM"},
     { subject: "Disaster Management", time: "10:20 AM"},
     { subject: "Project", time: "11:10 PM"},
   ], []);
 
-  // Prevent navigation back after logout
   const handleLogout = () => {
     window.history.pushState(null, "", "/login");
     logout();
@@ -240,7 +233,16 @@ const StudentDashboard = () => {
     setIsLoading(true);
   };
 
-  // Show loading state
+  // Function to open the student attendance sheet
+  const openAttendanceSheet = async (subjectName) => {
+    try {
+      const sheetUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit#gid=0&range=${subjectName}`;
+      window.open(sheetUrl, '_blank');
+    } catch (error) {
+      console.error("Error opening attendance sheet:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -257,7 +259,6 @@ const StudentDashboard = () => {
       <div className={isBlurred ? "filter blur-sm transition-all duration-300" : "transition-all duration-300"}>
         <div id="dashboard-content" className="p-3 sm:p-4 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Navbar section */}
             <div className="flex flex-row justify-between items-center mb-6 sm:mb-8">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Attendance Overview</h1>
               <div className="relative profile-dropdown-container">
@@ -288,7 +289,6 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            {/* Error message if any */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
                 <p>{error}</p>
@@ -301,13 +301,10 @@ const StudentDashboard = () => {
               </div>
             )}
 
-            {/* Dashboard content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-                {/* Attendance Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {sectionLoading.attendance ? (
-                    // Skeleton loaders for attendance cards
                     [...Array(4)].map((_, index) => (
                       <div key={index} className="bg-white p-4 sm:p-6 rounded-lg shadow-md animate-pulse">
                         <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -322,9 +319,15 @@ const StudentDashboard = () => {
                       </div>
                     ))
                   ) : attendanceData.length > 0 ? (
-                    attendanceData.map((data, index) => (
-                      <AttendanceCard key={index} {...data} />
-                    ))
+                    attendanceData.map((data, index) => {
+                      return (
+                        <AttendanceCard 
+                          key={index} 
+                          {...data} 
+                          onClick={() => openAttendanceSheet(data.subject)} 
+                        />
+                      );
+                    })
                   ) : (
                     <div className="col-span-2 bg-white p-4 rounded-lg shadow-md text-center">
                       <p className="text-gray-500">No attendance data available</p>
@@ -332,12 +335,10 @@ const StudentDashboard = () => {
                   )}
                 </div>
 
-                {/* Recent Classes */}
                 <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Recent Classes</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {sectionLoading.recentClasses ? (
-                      // Skeleton loaders for recent classes
                       [...Array(4)].map((_, index) => (
                         <div key={index} className="bg-gray-50 p-3 sm:p-4 rounded-lg animate-pulse">
                           <div className="flex justify-between items-center">
@@ -361,7 +362,6 @@ const StudentDashboard = () => {
               </div>
 
               <div className="space-y-4 sm:space-y-6">
-                {/* Quick Actions */}
                 <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Quick Actions</h2>
                   <div className="space-y-3">
@@ -372,6 +372,7 @@ const StudentDashboard = () => {
                       Request Correction
                     </button>
                     <button
+                      onClick={() => openAttendanceSheet(currentUser._id)}
                       className="w-full border border-gray-300 text-gray-700 py-2 sm:py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
                     >
                       <Download className="w-4 h-4 mr-2" />
@@ -380,7 +381,6 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
-                {/* Today's Schedule */}
                 <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h2 className="text-base sm:text-lg font-semibold p-4 sm:p-6 pb-2 sm:pb-4 text-gray-800">Today's Schedule</h2>
                   <div>
@@ -390,7 +390,6 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
-                {/* Calendar */}
                 <Calendar month={new Date().getMonth()} year={new Date().getFullYear()} />
               </div>
             </div>
