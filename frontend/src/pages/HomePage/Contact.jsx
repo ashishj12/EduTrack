@@ -7,31 +7,31 @@ const Contact = () => {
     {
       name: "Lokendra Singh",
       role: "ML Engineer",
-      email: "sbcet@edutrack.com",
+      email: "edutrack086@gmail.com",
       phone: "+91 8209874519",
     },
     {
       name: "Uttam Kumar",
       role: "Data Analytics ",
-      email: "sbcet@edutrack.com",
+      email: "edutrack086@gmail.com",
       phone: "+91 7393000914",
     },
     {
       name: "Ashish Kumar",
-      role: "Backend and Frontend Developer",
-      email: "sbcet@edutrack.com",
+      role: "Website Developer",
+      email: "edutrack086@gmail.com",
       phone: "+91 8690869917",
     },
     {
       name: "Tanishk Saini",
-      role: "Backend and Frontend Developer",
-      email: "sbcet@edutrack.com",
+      role: "App Developer",
+      email: "edutrack086@gmail.com",
       phone: "+91 9782150028",
     },
     {
       name: "Utkarsh Verma",
       role: "UI/UX Designer",
-      email: "sbcet@edutrack.com",
+      email: "edutrack086@gmail.com",
       phone: "+91 8824557829",
     },
   ];

@@ -12,6 +12,8 @@ import {
   markAttendanceApi,
   getRecentAttendanceApi,
   getStudentAttendanceApi,
+  submitCorrectionRequestApi,
+  getAllCorrectionsApi,
 } from "../services/authService";
 
 // Create the context
@@ -92,7 +94,6 @@ export const AuthProvider = ({ children }) => {
   const getAllStudents = async () => {
     try {
       const response = await getAllStudentsApi();
-      console.log('All Students:', response); // Log the response for debugging
       return response; 
     } catch (err) {
       console.error("Error fetching students:", err);
@@ -237,12 +238,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      // Log FormData fields for debugging (optional)
-      // Note: FormData contents can't be directly logged
-      console.log("Submitting attendance...");
-
       const data = await markAttendanceApi(formData);
-      console.log("Attendance API response:", data);
       setLoading(false);
       return data;
     } catch (err) {
@@ -256,9 +252,7 @@ export const AuthProvider = ({ children }) => {
   // Get recent attendance records
   const getRecentAttendance = async (limit = 5) => {
     try {
-      console.log("Fetching recent attendance records...");
       const response = await getRecentAttendanceApi(limit);
-      console.log("Recent attendance API response:", response);
       return response;
     } catch (err) {
       console.error("Error fetching recent attendance:", err);
@@ -284,6 +278,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
+
+  // Submit correction request
+  const submitCorrectionRequest = async (correctionData) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await submitCorrectionRequestApi(correctionData);
+      setLoading(false);
+      return response;
+    } catch (err) {
+      console.error("Error submitting correction request:", err);
+      setError(err.message || "Failed to submit correction request");
+      setLoading(false);
+      throw err;
+    }
+  };
+
+
+  // Get all correction requests (for admin view)
+  const getAllCorrections = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await getAllCorrectionsApi();
+      setLoading(false);
+      return response;
+    } catch (err) {
+      console.error("Error fetching correction requests:", err);
+      setError(err.message || "Failed to fetch correction requests");
+      setLoading(false);
+      throw err;
+    }
+  };
+  
+
   const value = {
     currentUser,
     loading,
@@ -302,6 +333,8 @@ export const AuthProvider = ({ children }) => {
     markAttendance,
     getRecentAttendance,
     getStudentAttendance,
+    submitCorrectionRequest,
+    getAllCorrections,
     isAuthenticated: !!currentUser,
   };
 

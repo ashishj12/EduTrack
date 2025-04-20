@@ -311,3 +311,51 @@ export const getStudentAttendanceApi = async (filters = {}) => {
     return []; 
   }
 };
+
+// Submit a correction request
+export const submitCorrectionRequestApi = async (correctionData) => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/student/correction`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(correctionData),
+    });
+    
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error submitting correction request:", error);
+    throw error;
+  }
+};
+
+
+// Get all correction requests (for admin)
+export const getAllCorrectionsApi = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("No authentication token found.");
+    }
+    
+    const response = await fetch(`${API_URL}/admin/corrections`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching correction requests:", error);
+    throw error;
+  }
+};

@@ -70,11 +70,6 @@ export default function TodayClasses() {
     setUploadClassId(null);
   };
 
-  // Debugging log
-  useEffect(() => {
-    console.log("Current Assigned Classes State:", assignedClasses);
-  }, [assignedClasses]);
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">

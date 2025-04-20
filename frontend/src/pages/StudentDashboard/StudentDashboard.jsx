@@ -7,7 +7,6 @@ import RecentClassCard from "../../components/StudentDashboard/RecentClassCard";
 import { useAuth } from "../../context/authContext";
 
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID || "your-spreadsheet-id-here";
-console.log("Spreadsheet ID:", SPREADSHEET_ID);
 
 // Circular progress component to show attendance percentage
 const CircularProgress = ({ percentage }) => {
@@ -397,7 +396,7 @@ const StudentDashboard = () => {
         </div>
       </div>
 
-      <CorrectionRequestModal isOpen={isModalOpen} onClose={closeModal} />
+      <CorrectionRequestModal isOpen={isModalOpen} onClose={closeModal} subjectsData={attendanceData} />
     </>
   );
 };

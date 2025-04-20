@@ -132,8 +132,6 @@ const UploadImage = ({ onClose, selectedClass }) => {
       formData.append("semester", e.target.semester.value);
 
       const result = await markAttendance(formData);
-      console.log("Attendance marked successfully:", result);
-
       // Show SweetAlert in the center of the screen
       Swal.fire({
         position: "center", // Set position to center

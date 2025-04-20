@@ -60,30 +60,21 @@ export default function RecentRecords() {
 
   // Function to handle subject click and open Google Sheets
   const handleSubjectClick = (record) => {
-    // Check if record has a sheetUrl directly
     if (record.sheetUrl) {
       window.open(record.sheetUrl, '_blank');
       return;
     }
-
-    // Based on the controller code, the URL would be constructed as:
-    // Spreadsheet ID is stored in env, but we can open the sheet based on naming convention
+    
     const subjectName = getSubjectName(record.subject);
     const batch = record.batch;
     const semester = record.semester;
-    
-    // Try to open based on information we have in Google Sheets
-    // This assumes the sheets are named with this convention in Google Sheets
-    // This is a basic implementation - ideally you would directly use the URL from the API
     if (subjectName && batch && semester) {
-      const spreadsheetId = import.meta.env.VITE_SPREADSHEET_ID; // If available in front-end
+      const spreadsheetId = import.meta.env.VITE_SPREADSHEET_ID; 
       if (spreadsheetId) {
         const sheetTitle = `${subjectName}-${batch}-${semester}`;
         const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0&range=${encodeURIComponent(sheetTitle)}`;
         window.open(sheetUrl, '_blank');
       } else {
-        // If we don't have the spreadsheet ID in the front-end, 
-        // we would need to call an API endpoint to get the sheet URL
         alert("Opening Google Sheets for: " + subjectName);
       }
     } else {

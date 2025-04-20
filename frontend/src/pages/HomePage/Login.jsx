@@ -32,9 +32,6 @@ const Login = () => {
         } else {
           user = await login(username, password);
         }
-
-        console.log("Login successful:", user);
-
         // Add a small delay to ensure storage is complete
         setTimeout(() => {
           // Redirect based on user role

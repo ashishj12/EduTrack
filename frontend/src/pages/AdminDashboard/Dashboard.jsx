@@ -7,7 +7,7 @@ import Header from "../../components/AdminDashboard/Header";
 import StudentManagement from "./StudentManagement";
 import StudentRegistrationForm from "./StudentRegistrationForm";
 import FacultyAssignmentForm from "./FacultyAssignmentForm";
-import AssignSubject from "./AssignSubject"; // Ensure this import is correct
+import AssignSubject from "./AssignSubject"; 
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("faculty");
@@ -76,7 +76,7 @@ const Dashboard = () => {
       icon: <ClipboardCheck className="w-6 h-6 text-white" />,
       bgColor: "bg-purple-100",
       iconBgColor: "bg-purple-500",
-      onClick: () => {}, // Add a no-op function to ensure onClick is consistent
+      onClick: () => {}, 
     },
     {
       id: 4,
@@ -85,7 +85,7 @@ const Dashboard = () => {
       icon: <FileText className="w-6 h-6 text-white" />,
       bgColor: "bg-orange-100",
       iconBgColor: "bg-orange-500",
-      onClick: () => setIsAssignSubjectFormOpen(true), // Explicitly set the state to true
+      onClick: () => setIsAssignSubjectFormOpen(true),
     },
   ];
 
@@ -114,7 +114,7 @@ const Dashboard = () => {
             <ActionCard 
               key={action.id} 
               action={action} 
-              onClick={action.onClick} // Ensure onClick is passed correctly
+              onClick={action.onClick} 
             />
           ))}
         </div>
@@ -142,8 +142,7 @@ const Dashboard = () => {
           isOpen={isStudentFormOpen}
           onClose={() => setIsStudentFormOpen(false)}
           onSubmit={(studentData) => {
-            console.log("New student data:", studentData);
-            setIsStudentFormOpen(false); // Close form after submission
+            setIsStudentFormOpen(false); 
           }}
         />
       )}
@@ -154,20 +153,18 @@ const Dashboard = () => {
           isOpen={isFacultyAssignmentFormOpen}
           onClose={() => setIsFacultyAssignmentFormOpen(false)}
           onSubmit={(facultyData) => {
-            console.log("New faculty data:", facultyData);
-            setIsFacultyAssignmentFormOpen(false); // Close form after submission
+            setIsFacultyAssignmentFormOpen(false); 
           }}
         />
       )}
 
-      {/* Assign Subject Form - Ensure this is correctly placed */}
+      {/* Assign Subject Form */}
       {isAssignSubjectFormOpen && (
         <AssignSubject
           isOpen={isAssignSubjectFormOpen}
           onClose={() => setIsAssignSubjectFormOpen(false)}
           onSubmit={(subjectData) => {
-            console.log("New subject data:", subjectData);
-            setIsAssignSubjectFormOpen(false); // Close form after submission
+            setIsAssignSubjectFormOpen(false); 
           }}
         />
       )}

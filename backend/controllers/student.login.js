@@ -2,7 +2,7 @@ import { Student } from "../models/student.model.js";
 import { generateTokens } from "../utils/generateToken.js";
 import { validateStudentLogin ,validateCorrection } from "../utils/validation.js";
 import logger from "../utils/logger.js";
-
+import Correction from "../models/Correction.js";
 
 // Login student
 export const loginUser = async (req, res, next) => {

@@ -19,23 +19,66 @@ const keys = JSON.parse(await readFile(path.join(__dirname, '../credentials.json
 
 dotenv.config();
 
-// Google Sheets setup
+// Google Sheets and Drive setup
 const setupGoogleSheets = async () => {
   try {
     const auth = new google.auth.GoogleAuth({
       credentials: keys,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive', // Added Drive API scope
+      ],
     });
     const client = await auth.getClient();
-    return google.sheets({ version: 'v4', auth: client });
+    return {
+      sheets: google.sheets({ version: 'v4', auth: client }),
+      drive: google.drive({ version: 'v3', auth: client }), // Initialize Drive API
+    };
   } catch (error) {
-    console.error("Error setting up Google Sheets:", error);
-    throw new Error("Failed to initialize Google Sheets API");
+    console.error("Error setting up Google APIs:", error);
+    throw new Error("Failed to initialize Google APIs");
+  }
+};
+
+// Set sheet permissions to read-only for everyone except owner
+const setSheetPermissions = async (driveApi, spreadsheetId) => {
+  try {
+    // Get current permissions to preserve owner access
+    const currentPermissions = await driveApi.permissions.list({
+      fileId: spreadsheetId,
+      fields: 'permissions(id, emailAddress, role, type)',
+    });
+
+    // Remove all existing permissions except the owner's
+    const ownerEmail = keys.client_email; // From credentials.json
+    for (const permission of currentPermissions.data.permissions) {
+      if (permission.emailAddress !== ownerEmail && permission.type !== 'user') {
+        await driveApi.permissions.delete({
+          fileId: spreadsheetId,
+          permissionId: permission.id,
+        });
+      }
+    }
+
+    // Set "anyone with the link" to read-only
+    await driveApi.permissions.create({
+      fileId: spreadsheetId,
+      sendNotificationEmail: false,
+      requestBody: {
+        role: 'reader', // Read-only access
+        type: 'anyone', // Anyone with the link
+      },
+    });
+
+    console.log(`Permissions set to read-only for spreadsheet ${spreadsheetId}`);
+  } catch (error) {
+    console.error("Error setting sheet permissions:", error);
+    throw new Error("Failed to set sheet permissions");
   }
 };
 
 // Create or update a sheet for a subject
-const createOrUpdateSubjectSheet = async (sheetsApi, subjectDetails, attendanceData) => {
+const createOrUpdateSubjectSheet = async (sheetsApi, driveApi, subjectDetails, attendanceData) => {
   try {
     const spreadsheetId = process.env.SPREADSHEET_ID;
     const sheetTitle = `${subjectDetails.subjectName}-${subjectDetails.batch}-${subjectDetails.semester}`;
@@ -78,6 +121,9 @@ const createOrUpdateSubjectSheet = async (sheetsApi, subjectDetails, attendanceD
       valueInputOption: 'RAW',
       resource: { values }
     });
+
+    // Set permissions to read-only
+    await setSheetPermissions(driveApi, spreadsheetId);
     
     return { spreadsheetId, sheetTitle };
   } catch (error) {
@@ -100,6 +146,374 @@ const getStringId = (objectOrString) => {
   return typeof objectOrString === 'string'
     ? objectOrString
     : (objectOrString._id ? objectOrString._id.toString() : objectOrString.toString());
+};
+
+// Helper to update personal student sheets after attendance changes
+const updatePersonalStudentSheets = async (sheetsApi, driveApi, spreadsheetId, changes, attendance) => {
+  try {
+    const sanitizeTitle = (title) => title.replace(/[\\\/:*?"<>|]/g, '-');
+    for (const change of changes) {
+      const studentInfo = attendance.students.find(s => 
+        getStringId(s.studentId) === getStringId(change.studentId)
+      );
+      if (!studentInfo || !studentInfo.studentId) continue;
+
+      const personalSheetTitle = sanitizeTitle(`${studentInfo.studentId.username}-${studentInfo.studentId.name}`);
+      
+      // Get all attendance records for this student
+      const studentAttendance = await Attendance.find({ 'students.studentId': studentInfo.studentId })
+        .populate('subject', 'subjectName subjectSem')
+        .populate('faculty', 'name username')
+        .sort({ date: 1 });
+
+      const values = studentAttendance.map(record => {
+        const studentRecord = record.students.find(s => 
+          getStringId(s.studentId) === getStringId(studentInfo.studentId)
+        );
+        return [
+          record.subject?.subjectName || "Unknown Subject",
+          new Date(record.date).toLocaleDateString(),
+          studentRecord?.present ? "Present" : "Absent",
+          record.faculty?.name || "Unknown Faculty",
+          record.batch || "N/A",
+          record.semester || "N/A"
+        ];
+      });
+
+      // Check if sheet exists
+      const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+      let existingSheet = spreadsheet.data.sheets.find(
+        sheet => sheet.properties.title === personalSheetTitle
+      );
+
+      if (!existingSheet) {
+        await sheetsApi.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource: {
+            requests: [{
+              addSheet: {
+                properties: { title: personalSheetTitle }
+              }
+            }]
+          }
+        });
+      }
+
+      // Update headers
+      await sheetsApi.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${personalSheetTitle}!A1:F1`,
+        valueInputOption: 'RAW',
+        resource: {
+          values: [["Subject", "Date", "Present/Absent", "Faculty", "Batch", "Semester"]]
+        }
+      });
+
+      // Clear existing data
+      const response = await sheetsApi.spreadsheets.values.get({
+        spreadsheetId,
+        range: `${personalSheetTitle}!A:F`,
+      });
+
+      const rowCount = response.data.values ? response.data.values.length : 1;
+      if (rowCount > 1) {
+        await sheetsApi.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource: {
+            requests: [{
+              deleteDimension: {
+                range: {
+                  sheetId: existingSheet?.properties.sheetId,
+                  dimension: "ROWS",
+                  startIndex: 1,
+                  endIndex: rowCount
+                }
+              }
+            }]
+          }
+        });
+      }
+
+      // Append new data
+      if (values.length > 0) {
+        await sheetsApi.spreadsheets.values.append({
+          spreadsheetId,
+          range: `${personalSheetTitle}!A2:F`,
+          valueInputOption: 'RAW',
+          resource: { values }
+        });
+      }
+
+      // Set permissions to read-only
+      await setSheetPermissions(driveApi, spreadsheetId);
+    }
+  } catch (error) {
+    console.error("Error updating personal student sheets:", error);
+    // Continue without failing the main operation
+  }
+};
+
+// Helper to mark attendance as deleted in Google Sheets
+const markAttendanceAsDeleted = async (attendance, attendanceDate, subjectName) => {
+  try {
+    const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const sheetTitle = `${subjectName}-${attendance.batch}-${attendance.semester}`;
+
+    const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+    const existingSheet = spreadsheet.data.sheets.find(
+      sheet => sheet.properties.title === sheetTitle
+    );
+
+    if (existingSheet) {
+      const response = await sheetsApi.spreadsheets.values.get({
+        spreadsheetId,
+        range: `${sheetTitle}!A:E`,
+      });
+
+      const sheetData = response.data.values || [];
+      for (let i = 1; i < sheetData.length; i++) {
+        const row = sheetData[i];
+        if (row[2] === attendanceDate) {
+          await sheetsApi.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${sheetTitle}!D${i + 1}`,
+            valueInputOption: 'RAW',
+            resource: { values: [["Deleted"]] }
+          });
+        }
+      }
+
+      // Update personal sheets
+      for (const student of attendance.students) {
+        const personalSheetTitle = `${student.studentId.username}-${student.studentId.name}`;
+        const personalResponse = await sheetsApi.spreadsheets.values.get({
+          spreadsheetId,
+          range: `${personalSheetTitle}!A:F`,
+        });
+
+        const personalSheetData = personalResponse.data.values || [];
+        for (let i = 1; i < personalSheetData.length; i++) {
+          const row = personalSheetData[i];
+          if (row[1] === attendanceDate && row[0] === subjectName) {
+            await sheetsApi.spreadsheets.values.update({
+              spreadsheetId,
+              range: `${personalSheetTitle}!C${i + 1}`,
+              valueInputOption: 'RAW',
+              resource: { values: [["Deleted"]] }
+            });
+          }
+        }
+      }
+
+      // Set permissions to read-only
+      await setSheetPermissions(driveApi, spreadsheetId);
+    }
+  } catch (error) {
+    console.error("Error marking attendance as deleted in Google Sheets:", error);
+    // Continue without failing
+  }
+};
+
+// Helper to sync a subject's attendance data to Google Sheets
+const syncSubjectSheet = async (sheetsApi, driveApi, spreadsheetId, subjectId, subjectName, batch, semester) => {
+  try {
+    const sheetTitle = `${subjectName}-${batch}-${semester}`;
+    
+    // Get all attendance records for this subject, batch, and semester
+    const attendanceRecords = await Attendance.find({
+      subject: subjectId,
+      batch,
+      semester
+    })
+      .populate('subject', 'subjectName subjectSem')
+      .populate('faculty', 'name username')
+      .populate('students.studentId', 'name username')
+      .sort({ date: 1 });
+
+    // Check if sheet exists
+    const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+    let existingSheet = spreadsheet.data.sheets.find(
+      sheet => sheet.properties.title === sheetTitle
+    );
+
+    if (!existingSheet) {
+      await sheetsApi.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            addSheet: {
+              properties: { title: sheetTitle }
+            }
+          }]
+        }
+      });
+    }
+
+    // Update headers
+    await sheetsApi.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetTitle}!A1:E1`,
+      valueInputOption: 'RAW',
+      resource: {
+        values: [["Roll Number", "Name", "Date", "Present/Absent", "Faculty"]]
+      }
+    });
+
+    // Clear existing data
+    const response = await sheetsApi.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetTitle}!A:E`,
+    });
+
+    const rowCount = response.data.values ? response.data.values.length : 1;
+    if (rowCount > 1) {
+      await sheetsApi.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            deleteDimension: {
+              range: {
+                sheetId: existingSheet?.properties.sheetId,
+                dimension: "ROWS",
+                startIndex: 1,
+                endIndex: rowCount
+              }
+            }
+          }]
+        }
+      });
+    }
+
+    // Prepare data
+    const values = [];
+    for (const record of attendanceRecords) {
+      const formattedDate = new Date(record.date).toLocaleDateString();
+      for (const student of record.students) {
+        values.push([
+          student.studentId.username,
+          student.studentId.name,
+          formattedDate,
+          student.present ? "Present" : "Absent",
+          record.faculty.name
+        ]);
+      }
+    }
+
+    // Append data
+    if (values.length > 0) {
+      await sheetsApi.spreadsheets.values.append({
+        spreadsheetId,
+        range: `${sheetTitle}!A2:E`,
+        valueInputOption: 'RAW',
+        resource: { values }
+      });
+    }
+
+    // Set permissions to read-only
+    await setSheetPermissions(driveApi, spreadsheetId);
+  } catch (error) {
+    console.error(`Error syncing sheet ${subjectName}-${batch}-${semester}:`, error);
+    throw error;
+  }
+};
+
+// Helper to sync a student's personal attendance sheet
+const syncStudentPersonalSheet = async (sheetsApi, driveApi, spreadsheetId, student) => {
+  try {
+    const sanitizeTitle = (title) => title.replace(/[\\\/:*?"<>|]/g, '-');
+    const personalSheetTitle = sanitizeTitle(`${student.username}-${student.name}`);
+
+    // Get all attendance records for this student
+    const attendanceRecords = await Attendance.find({ 'students.studentId': student._id })
+      .populate('subject', 'subjectName subjectSem')
+      .populate('faculty', 'name username')
+      .sort({ date: 1 });
+
+    const values = attendanceRecords.map(record => {
+      const studentRecord = record.students.find(s => 
+        getStringId(s.studentId) === student._id.toString()
+      );
+      return [
+        record.subject?.subjectName || "Unknown Subject",
+        new Date(record.date).toLocaleDateString(),
+        studentRecord?.present ? "Present" : "Absent",
+        record.faculty?.name || "Unknown Faculty",
+        record.batch || "N/A",
+        record.semester || "N/A"
+      ];
+    });
+
+    // Check if sheet exists
+    const spreadsheet = await sheetsApi.spreadsheets.get({ spreadsheetId });
+    let existingSheet = spreadsheet.data.sheets.find(
+      sheet => sheet.properties.title === personalSheetTitle
+    );
+
+    if (!existingSheet) {
+      await sheetsApi.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            addSheet: {
+              properties: { title: personalSheetTitle }
+            }
+          }]
+        }
+      });
+    }
+
+    // Update headers
+    await sheetsApi.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${personalSheetTitle}!A1:F1`,
+      valueInputOption: 'RAW',
+      resource: {
+        values: [["Subject", "Date", "Present/Absent", "Faculty", "Batch", "Semester"]]
+      }
+    });
+
+    // Clear existing data
+    const response = await sheetsApi.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${personalSheetTitle}!A:F`,
+    });
+
+    const rowCount = response.data.values ? response.data.values.length : 1;
+    if (rowCount > 1) {
+      await sheetsApi.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            deleteDimension: {
+              range: {
+                sheetId: existingSheet?.properties.sheetId,
+                dimension: "ROWS",
+                startIndex: 1,
+                endIndex: rowCount
+              }
+            }
+          }]
+        }
+      });
+    }
+
+    // Append data
+    if (values.length > 0) {
+      await sheetsApi.spreadsheets.values.append({
+        spreadsheetId,
+        range: `${personalSheetTitle}!A2:F`,
+        valueInputOption: 'RAW',
+        resource: { values }
+      });
+    }
+
+    // Set permissions to read-only
+    await setSheetPermissions(driveApi, spreadsheetId);
+  } catch (error) {
+    console.error(`Error syncing personal sheet for ${student.username}:`, error);
+    throw error;
+  }
 };
 
 export const markAttendance = async (req, res) => {
@@ -238,7 +652,7 @@ export const markAttendance = async (req, res) => {
 
       // Prepare Google Sheets integration
       try {
-        const sheetsApi = await setupGoogleSheets();
+        const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
 
         // Format data for Google Sheets
         const populatedAttendance = await Attendance.findById(attendanceRecord._id)
@@ -253,14 +667,14 @@ export const markAttendance = async (req, res) => {
           semester
         };
 
-        const sheetInfo = await createOrUpdateSubjectSheet(sheetsApi, subjectDetails, populatedAttendance);
+        const sheetInfo = await createOrUpdateSubjectSheet(sheetsApi, driveApi, subjectDetails, populatedAttendance);
         const sheetLink = getSheetShareableLink(sheetInfo.spreadsheetId, sheetInfo.sheetTitle);
 
         // Update attendance record with sheet link
         attendanceRecord.sheetUrl = sheetLink;
         await attendanceRecord.save();
 
-        // NEW CODE: Update personal sheets for all students
+        // Update personal sheets for all students
         const studentSheetUpdates = [];
         const spreadsheetId = process.env.SPREADSHEET_ID;
 
@@ -373,6 +787,9 @@ export const markAttendance = async (req, res) => {
               }
             }
 
+            // Set permissions to read-only
+            await setSheetPermissions(driveApi, spreadsheetId);
+
             const sheetLink = getSheetShareableLink(spreadsheetId, personalSheetTitle);
             studentSheetUpdates.push({
               studentId: studentId,
@@ -481,7 +898,7 @@ export const getSubjectAttendanceSheet = async (req, res) => {
     }
 
     // Setup Google Sheets
-    const sheetsApi = await setupGoogleSheets();
+    const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
     const spreadsheetId = process.env.SPREADSHEET_ID;
 
     // Format sheet title
@@ -501,6 +918,9 @@ export const getSubjectAttendanceSheet = async (req, res) => {
         message: "No attendance sheet found for this subject"
       });
     }
+
+    // Ensure permissions are read-only
+    await setSheetPermissions(driveApi, spreadsheetId);
 
     // Generate shareable link
     const sheetLink = getSheetShareableLink(spreadsheetId, sheetTitle);
@@ -548,8 +968,8 @@ export const getStudentPersonalSheet = async (req, res) => {
     }
 
     // 4. Set up Sheets API
-    const sheetsApi = await setupGoogleSheets();
-    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
+    const kritikaspreadsheetId = process.env.SPREADSHEET_ID;
 
     const sanitizeTitle = (title) => title.replace(/[\\\/:*?"<>|]/g, '-');
     const personalSheetTitle = sanitizeTitle(`${student.username}-${student.name}`);
@@ -656,7 +1076,10 @@ export const getStudentPersonalSheet = async (req, res) => {
       }
     }
 
-    // 9. Get shareable link
+    // 9. Set permissions to read-only
+    await setSheetPermissions(driveApi, spreadsheetId);
+
+    // 10. Get shareable link
     const sheetLink = getSheetShareableLink(spreadsheetId, personalSheetTitle);
 
     return res.status(200).json({
@@ -676,7 +1099,6 @@ export const getStudentPersonalSheet = async (req, res) => {
   }
 };
 
-
 // Get all attendance records
 export const getAllAttendance = async (req, res) => {
   try {
@@ -694,7 +1116,7 @@ export const getAllAttendance = async (req, res) => {
     const query = {};
 
     // Faculty users can only view their own records unless they have special permissions
-    if (role === 'Faculty' && !faculty) {
+    if (role === 'Faculty') {
       query.faculty = userId;
     } else if (faculty) {
       query.faculty = faculty;
@@ -826,11 +1248,15 @@ export const getStudentAttendance = async (req, res) => {
     let sheetUrl = null;
     try {
       // Setup Google Sheets
-      const sheetsApi = await setupGoogleSheets();
+      const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
       const spreadsheetId = process.env.SPREADSHEET_ID;
 
       // Format sheet title for personal sheet
-      const personalSheetTitle = `${student.username}-${student.name}`;
+      const sanitizeTitle = (title) => title.replace(/[\\\/:*?"<>|]/g, '-');
+      const personalSheetTitle = sanitizeTitle(`${student.username}-${student.name}`);
+
+      // Ensure permissions are read-only
+      await setSheetPermissions(driveApi, spreadsheetId);
 
       // Generate shareable link
       sheetUrl = getSheetShareableLink(spreadsheetId, personalSheetTitle);
@@ -1041,7 +1467,7 @@ export const updateAttendance = async (req, res) => {
     // Update Google Sheets if there are changes
     if (changes.length > 0) {
       try {
-        const sheetsApi = await setupGoogleSheets();
+        const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
         const spreadsheetId = process.env.SPREADSHEET_ID;
 
         // Format sheet title
@@ -1099,7 +1525,10 @@ export const updateAttendance = async (req, res) => {
           }
 
           // Also update personal student sheets
-          await updatePersonalStudentSheets(sheetsApi, spreadsheetId, changes, attendance);
+          await updatePersonalStudentSheets(sheetsApi, driveApi, spreadsheetId, changes, attendance);
+
+          // Ensure permissions are read-only
+          await setSheetPermissions(driveApi, spreadsheetId);
         }
       } catch (sheetsError) {
         console.error("Error updating Google Sheets:", sheetsError);
@@ -1201,7 +1630,7 @@ export const syncAllAttendanceToSheets = async (req, res) => {
     }
 
     // Setup Google Sheets
-    const sheetsApi = await setupGoogleSheets();
+    const { sheets: sheetsApi, drive: driveApi } = await setupGoogleSheets();
     const spreadsheetId = process.env.SPREADSHEET_ID;
 
     // Get all subjects with attendance records
@@ -1229,7 +1658,7 @@ export const syncAllAttendanceToSheets = async (req, res) => {
       if (!subjectName || !batch || !semester) continue;
 
       try {
-        await syncSubjectSheet(sheetsApi, spreadsheetId, subjectId, subjectName, batch, semester);
+        await syncSubjectSheet(sheetsApi, driveApi, spreadsheetId, subjectId, subjectName, batch, semester);
         processedCount++;
       } catch (error) {
         console.error(`Error syncing ${subjectMap[subjectId]}-${batch}-${semester}:`, error);
@@ -1243,7 +1672,7 @@ export const syncAllAttendanceToSheets = async (req, res) => {
 
     for (const student of students) {
       try {
-        await syncStudentPersonalSheet(sheetsApi, spreadsheetId, student);
+        await syncStudentPersonalSheet(sheetsApi, driveApi, spreadsheetId, student);
         studentProcessed++;
       } catch (error) {
         console.error(`Error creating personal sheet for ${student.username}:`, error);
@@ -1270,4 +1699,3 @@ export const syncAllAttendanceToSheets = async (req, res) => {
     return res.status(500).json({ message: "Synchronization failed", error: error.message });
   }
 };
-
