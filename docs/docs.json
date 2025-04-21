@@ -1,0 +1,862 @@
+{
+	"info": {
+		"_postman_id": "dae55b00-7206-4e3c-868c-2b8a46409fb4",
+		"name": "EduTrack - An Attendance System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34118587"
+	},
+	"item": [
+		{
+			"name": "Students",
+			"item": [
+				{
+					"name": "Login Student",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y5NGY1Mjk3YWUwMDRlNWIyZTIxYjMiLCJ1c2VybmFtZSI6IjIxZXNiY3MwMDYiLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc0NTE5ODkyMiwiZXhwIjoxNzQ1MjAyNTIyfQ.sRWtONgZjWWmIixNwH-j6Olq_rj-1esmk2gXTiJKuJ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"username\",\n    \"password\":\"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/student/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"student",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Attendance Records",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y5NGY1Mjk3YWUwMDRlNWIyZTIxYjMiLCJ1c2VybmFtZSI6IjIxZXNiY3MwMDYiLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc0NTE5ODkyMiwiZXhwIjoxNzQ1MjAyNTIyfQ.sRWtONgZjWWmIixNwH-j6Olq_rj-1esmk2gXTiJKuJ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/get-student/records",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"get-student",
+								"records"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Sheet",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y5NGY1Mjk3YWUwMDRlNWIyZTIxYjMiLCJ1c2VybmFtZSI6IjIxZXNiY3MwMDYiLCJyb2xlIjoiU3R1ZGVudCIsImlhdCI6MTc0NTE5ODkyMiwiZXhwIjoxNzQ1MjAyNTIyfQ.sRWtONgZjWWmIixNwH-j6Olq_rj-1esmk2gXTiJKuJ4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/student-sheet",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"student-sheet"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Faculty",
+			"item": [
+				{
+					"name": "Login Faculty",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `",
+									"<canvas id=\"myChart\" height=\"75\"></canvas>",
+									"",
+									"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+									"",
+									"<script>",
+									"    var ctx = document.getElementById(\"myChart\");",
+									"",
+									"    var myChart = new Chart(ctx, {",
+									"        type: \"bar\",",
+									"        data: {",
+									"            labels: [],",
+									"            datasets: [{",
+									"                data: [],",
+									"                ",
+									"                // Change these colours to customize the chart",
+									"                backgroundColor: [\"#003f5c\", \"#58508d\", \"#bc5090\", \"#ff6361\", \"#ffa600\"],",
+									"            }]",
+									"        },",
+									"        options: {",
+									"            legend: { display: false },",
+									"            title: {",
+									"                display: true,",
+									"                text: 'Count'",
+									"            },",
+									"            scales: {",
+									"                xAxes: [{",
+									"                    display: true,",
+									"                    scaleLabel: {",
+									"                        display: true,",
+									"                        labelString: 'Items'",
+									"                    }",
+									"                }],",
+									"                yAxes: [{",
+									"                    display: true,",
+									"                    scaleLabel: {",
+									"                        display: true,",
+									"                        labelString: 'Count'",
+									"                    }",
+									"                }]",
+									"            }",
+									"        }",
+									"",
+									"    });",
+									"",
+									"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+									"    // code of the Visualizer template",
+									"    pm.getData(function (err, value) {",
+									"        myChart.data.datasets[0].data = value.response.data;",
+									"        myChart.data.labels = value.response.labels;",
+									"        myChart.update();",
+									"    });",
+									"",
+									"</script>`;",
+									"",
+									"function constructVisualizerPayload() {",
+									"    var res = pm.response.json();",
+									"    ",
+									"    var visualizerData = {",
+									"        ",
+									"        // Labels take an array of strings",
+									"        labels: ['Error'], // default label for error response",
+									"        // Data takes an array of numbers, default is 0",
+									"        data: [0] // default value for error response",
+									"    };",
+									"",
+									"    if (res.message) {",
+									"        visualizerData.labels = ['Error'];",
+									"        visualizerData.data = [1];",
+									"    }",
+									"  ",
+									"    return {response: visualizerData};",
+									"}",
+									"",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"test@gmail.com\",\n    \"password\":\"test123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/faculty/login-faculty",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"faculty",
+								"login-faculty"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Upload Image",
+			"item": [
+				{
+					"name": "Image Upload",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2M5OGQ2ZjI4ZGI0YjczOTFjZjU3NWMiLCJ1c2VybmFtZSI6ImFzaGlzaEBnbWFpbC5jb20iLCJyb2xlIjoiRmFjdWx0eSIsImlhdCI6MTc0MTg0MzY3NiwiZXhwIjoxNzQxODQ3Mjc2fQ.BupUBnM1rUFN4w0keiUMfVitPy14hBv-9D1Zy6LIAXk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1efffccb-20d6-4bd0-b0fa-be127c49bccf"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/upload/faculty",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"upload",
+								"faculty"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Admin Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"test@gmail.com\",\n    \"password\":\"test123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/admin-register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"admin-register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Register Faculty",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"test1@gmail.com\",\n    \"password\":\"test123\",\n    \"name\":\"test faculty 1\",\n    \"department\":\"cse\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/register-faculty",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"register-faculty"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Assign Subject",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subjectName\":\"XYZ\",\n    \"subjectSem\":\"8\",\n    \"facultyId\":\"68059ea3a20251d24eafb673\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/assign-subject",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"assign-subject"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Register Student",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"21esbcs001\",\n    \"password\":\"test123\",\n    \"name\":\"Test User\",\n    \"branch\":\"CSE\",\n    \"semester\":\"8\",\n    \"batch\":\"2021\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/register-student",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"register-student"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"test1@gmail.com\",\n    \"password\":\"test123\",\n    \"secretKey\":\"449890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/admin/admin-login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"admin-login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Students",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/student/all-students",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"student",
+								"all-students"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Faculties",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/faculty/all-faculties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"faculty",
+								"all-faculties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Assiged Subjects",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/faculty/assigned-subjects",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"faculty",
+								"assigned-subjects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current Faculty",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/faculty/get-faculty",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"faculty",
+								"get-faculty"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Google Sheets",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/sync-sheets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"sync-sheets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Corrections",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODA1OWUzMWEyMDI1MWQyNGVhZmI2NjYiLCJ1c2VybmFtZSI6InRlc3QxQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0NTE5ODY2NywiZXhwIjoxNzQ1MjAyMjY3fQ.gqTpdKOpUr47IGeucMloQcwMn6w1nnUFsLEFgMmawQM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/admin/corrections",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"admin",
+								"corrections"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "Mark Attendance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y4YWRmYWQ2YmQ3NWVkMzZiOGQzNDgiLCJ1c2VybmFtZSI6InRlc3RAZ21haWwuY29tIiwicm9sZSI6IkZhY3VsdHkiLCJpYXQiOjE3NDUwNDAyMzMsImV4cCI6MTc0NTA0MzgzM30.zoiubq3jIHVXzKYMvWoyuFlPDnyR6xeUA_uS3ceTSlQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "subjectId",
+									"value": "67f9320758d6491909e0770d",
+									"type": "text"
+								},
+								{
+									"key": "date",
+									"value": "19-04-2025",
+									"type": "text"
+								},
+								{
+									"key": "batch",
+									"value": "2021",
+									"type": "text"
+								},
+								{
+									"key": "semester",
+									"value": "8",
+									"type": "text"
+								},
+								{
+									"key": "attendanceImage",
+									"type": "file",
+									"src": "postman-cloud:///1f016fa5-e1d9-4f00-9569-8c06ae8ff7b7"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/mark-attendance",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"mark-attendance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Attendance Records",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y4YWRmYWQ2YmQ3NWVkMzZiOGQzNDgiLCJ1c2VybmFtZSI6InRlc3RAZ21haWwuY29tIiwicm9sZSI6IkZhY3VsdHkiLCJpYXQiOjE3NDUwNDAyMzMsImV4cCI6MTc0NTA0MzgzM30.zoiubq3jIHVXzKYMvWoyuFlPDnyR6xeUA_uS3ceTSlQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/all-attendance",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"all-attendance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y4YWRmYWQ2YmQ3NWVkMzZiOGQzNDgiLCJ1c2VybmFtZSI6InRlc3RAZ21haWwuY29tIiwicm9sZSI6IkZhY3VsdHkiLCJpYXQiOjE3NDQ4NTMwMzcsImV4cCI6MTc0NDg1NjYzN30.3V6_r8hQrYDGDGVEgOa8gO9d6lMaEL1Hu6h7kWR4Uck",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/68005e3ad4aba5eb230b4aad",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"68005e3ad4aba5eb230b4aad"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Google Sheet for Subject Attendance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Y4YWRmYWQ2YmQ3NWVkMzZiOGQzNDgiLCJ1c2VybmFtZSI6InRlc3RAZ21haWwuY29tIiwicm9sZSI6IkZhY3VsdHkiLCJpYXQiOjE3NDQ5NTYxNDEsImV4cCI6MTc0NDk1OTc0MX0.CzyDaojf-IWf8qqEe6JebP4mGCBGGMVuzMyaePKlZCA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/attendance/subject-sheet/67f8ae08d6bd75ed36b8d352/2021/8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"attendance",
+								"subject-sheet",
+								"67f8ae08d6bd75ed36b8d352",
+								"2021",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Model  Testing",
+			"item": [
+				{
+					"name": "Model Test",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1f015d8f-be9a-4d00-a7b4-376087d6bc62"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://0.0.0.0:8000/predict/",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8000",
+							"path": [
+								"predict",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
