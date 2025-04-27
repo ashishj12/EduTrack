@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  frontend:
+    # image: frontend-image:latest
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+  # mongo:
+  #   image: mongo:latest
+  #   container_name: mongo
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   networks:
+  #     - app-network
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/backend
+      - /backend/node_modules
+    command: |
+      sh -c "
+      wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -O /wait-for-it.sh &&
+      chmod +x /wait-for-it.sh &&
+      /wait-for-it.sh face:8000 -t 30 -- npm run dev"
+    networks:
+      - app-network
+    env_file:
+      - .env
+    depends_on:
+      - face
+    environment:
+      - FACE_RECOGNITION_API_URL=http://face:8000
+      
+  face:
+    # image: face-image:latest
+    build:
+      context: ./face
+    container_name: face
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./face:/face
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge

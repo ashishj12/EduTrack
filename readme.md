@@ -1,14 +1,20 @@
-# EduTrack - AI-Powered Attendance Management System
 
-## 📌 Project Overview
+# EduTrack - Image Based Attendance Management System
 
-EduTrack is an innovative attendance management system that leverages AI-based facial recognition technology to automate and streamline attendance tracking in educational institutions. The system is designed with role-based access controls for students, faculty, and administrators, providing customized experiences through dedicated dashboards.
+## Project Overview
 
-The application eliminates manual attendance processes, reduces administrative overhead, and ensures accurate attendance records through its advanced facial recognition capabilities.
+EduTrack is a smart attendance system built for schools, colleges, and universities. It uses Image Based recognition to take attendance automatically, so there’s no need for roll calls or manual tracking.
 
-## 🚀 Key Features
+With personalized dashboards for students, teachers, and administrators, everyone gets the tools they need, right at their fingertips.
 
-- **AI-Powered Face Recognition**: Automated attendance tracking using facial recognition technology.
+By cutting out the paperwork and streamlining the process, EduTrack saves time, reduces errors, and makes managing attendance simple, fast, and accurate.
+
+
+
+
+## Key Features
+
+- **Image Based Face Recognition**: Automated attendance tracking using facial recognition technology.
 - **Role-Based Access Control**: Separate interfaces for administrators, faculty, and students.
 - **Secure Authentication**: Hardcoded credentials in MongoDB Atlas without registration route.
 - **Cloud-Based Storage**: Data persistence using MongoDB & MongoDB Atlas.
@@ -17,117 +23,192 @@ The application eliminates manual attendance processes, reduces administrative o
   - Faculty Dashboard for managing attendance records.
   - Student Dashboard for viewing attendance history and schedules.
 - **Containerized Deployment**: Dockerized setup for easy installation and scalability.
-
-## 🖥️ Technology Stack
+## Tech Stack
 
 - **Frontend**: React.js with Vite
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB Atlas
-- **AI Components**: TensorFlow.js for facial recognition
+- **AI Components**: MTCNN and FaceNet Model for facial recognition
 - **Containerization**: Docker & Docker Compose
 - **Authentication**: JWT (JSON Web Tokens)
 
-## 🏗️ Project Structure
 
-### Frontend (frontend/)
-```bash
-frontend/
-│── public/
-│── src/
-│   ├── components/
-│   ├── constants/
-│   ├── context/
-│   ├── lib/
-│   ├── pages/
-│   │   ├── AdminDashboard/
-│   │   ├── FacultyDashboard/
-│   │   ├── HomePage/
-│   │   ├── StudentDashboard/
-│   ├── services/
-│   ├── utils/
-│── App.css
-│── App.jsx
-│── index.css
-│── main.jsx
-│── index.html
-│── package.json
-│── vite.config.js
-
-
-### Backend (backend/)
-
-backend/
-│── controllers/
-│── middleware/
-│── models/
-│── routes/
-│── utils/
-│── .env.sample
-│── .gitignore
-│── server.js
-│── package.json
-```
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Node.js (v16+)
 - MongoDB Atlas account
-### Manual Setup
+- Docker & Docker Compose (for containerized setup)
 
 ### Backend Setup
-- Navigate to the backend directory: 
-    `cd backend`
 
-- Create a .env file based on .env.sample: 
-    `PORT=5000`
+- Navigate to the backend directory:
 
-    MONGO_URI=`your_mongodb_atlas_connection_string`
-    
-    JWT_SECRET=your_jwt_secret
-    `NODE_ENV=development`
+        cd backend
+
+- Create a `.env` file based on `.env.sample` with the following content:
+
+    ```env
+        DB_URI='MongoDB URI'
+
+        PORT="Port"
+
+        JWT_SECRET="Your Key"
+
+        CLOUDINARY_CLOUD_NAME="Cloud Name"
+        CLOUDINARY_API_KEY="Cloud API Key"
+        CLOUDINARY_API_SECRET="API Secret"
+        FACE_RECOGNITION_API_URL="http://0.0.0.0:8000"
+
+        SPREADSHEET_ID = "SpreadSheet ID"
+    ```
+
+-  Install dependencies :
+
+            npm install
 
 -  Start the Backend Server:
-    `npm run dev`
+
+            npm run dev
+
+- Check out the [Backend API Documentation](./backend/readme.md) for more details.
 
 ### Frontend Setup
 
--  Navigate to the frontend directory: 
-    `cd frontend`
--  Install dependencies : 
-    ``npm install``
+-  Navigate to the frontend directory:
+
+           cd frontend
+
+- Create a `.env` file based on `.env.sample` with the following content:
+
+    ```env
+        # Spreadsheet ID
+        VITE_SPREADSHEET_ID="SpreadSheet Id"
+
+        # Base URL
+        VITE_API_BASE_URL="Backend URI"
+    ```
+
+-  Install dependencies :
+
+            npm install
 -  Start the development server:
 
-    ```npm run dev```
--  Access the application at http://localhost:5147
+         npm run dev
 
-### 👤 Role-Based Access Control (RBAC)
+-  Access the application at http://localhost:5173
+
+- Check out the [Frontend API Documentation](./frontend/README.md) for more details.
+
+## Face Recognition Model Setup
+
+### Prerequisites
+
+- Python 3.8+
+- Virtual Environment (optional but recommended)
+- Required Python libraries: `tensorflow`, `keras`, `mtcnn`, `numpy`, `opencv-python`
+
+### Setup Instructions
+
+1. **Navigate to the Face Recognition Directory**:
+
+        cd face
+
+2. **Create a Virtual Environment** (optional but recommended):
+
+        python -m venv venv
+
+3. **Activate the Virtual Environment**:
+
+   - On Windows:
+
+            venv\Scripts\activate
+
+   - On macOS/Linux:
+
+            source venv/bin/activate
+
+4. **Install Required Dependencies**:
+
+        pip install -r requirements.txt
+
+5. **Run the Face Recognition API**:
+
+        uvicorn main:app --host 0.0.0.0 --port 8000
+
+6. **Verify the API**:
+
+   Access the API at `http://0.0.0.0:8000` to ensure it is running correctly.
+
+### Notes
+
+- Ensure the `FACE_RECOGNITION_API_URL` in your `.env` file matches the API URL (`http://0.0.0.0:8000`).
+- The `requirements.txt` file should include all necessary dependencies for the face recognition model.
+
+## Docker Setup
+
+## Prerequisites
+
+- Docker installed ([Download Docker](https://www.docker.com/products/docker-desktop))
+- Docker Compose (included with Docker Desktop)
+
+
+## Setup Docker Files 
+
+- Create a .env file in the project root with your environment variables
+
+        DB_URI="DB URI"
+
+        PORT="Backend Port"
+
+        JWT_SECRET=<your_jwt_secret>
+
+        CLOUDINARY_CLOUD_NAME=<your_cloud_name>
+        CLOUDINARY_API_KEY=<your_api_key>
+        CLOUDINARY_API_SECRET=<your_api_secret>
+
+        FACE_RECOGNITION_API_URL=http://0.0.0.0:8000
+
+        SPREADSHEET_ID=<your_spreadsheet_id>
+
+- Build and Run with Docker Compose
+
+        docker-compose up --build
+
+
+## Role-Based Access Control (RBAC)
+
 EduTrack implements a secure role-based access control system with the following user roles:
 
-### 🔑 Admin
+### Admin
 
 - Full access to all system features
 - User management capabilities
 - Analytics and reporting
 
-### 👨‍🏫 Faculty
+###  Faculty
 
 - Manage course attendance
 - View student attendance records
 - Generate attendance reports
-- Mark attendance manually if needed
+- Mark attendance
 
-### 🧑‍🎓 Student
+###  Student
 
 - View personal attendance records
 - Check schedules and timetables
 - Receive notifications for attendance status
 
-Note: User credentials are pre-defined in MongoDB Atlas. There is no registration route as per institutional security requirements.
+Note: User credentials are pre-defined in MongoDB Atlas. There is no registration route.
 
-### 👥 Contributors
+## Authors
 
-**Ashish Kumar** - Web App Developer & Maintainer
-**Tanisk Saini** - App Developer & Maintainer
-**Lokendra Singh** - ML Developer
-**Uttam Kumar** - Data Analytics
-**Utkarsh Verma** - UI/UX Designer
+- [Ashish Kumar](https://github.com/ashishj12/EduTrack)
+
+- [Tanishk Saini](https://github.com/Tanishksaini)
+
+- [Lokendra Singh](https://github.com/Lokendra-singh-Rathore9)
+
+- [Uttam Kumar](https://github.com/wolfos20)
+
+

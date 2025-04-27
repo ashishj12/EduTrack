@@ -1,5 +1,10 @@
 # EduTrack API Documentation
 
+## Overview
+EduTrack provides a comprehensive API for managing students, faculty, and subjects in an educational institution. This documentation outlines the available routes, their usage, and expected responses.
+
+---
+
 ## Authentication Routes
 
 ### Student Routes
@@ -85,6 +90,8 @@
     }
   }
   ```
+
+---
 
 ### Faculty Routes
 
@@ -194,6 +201,8 @@
   }
   ```
 
+---
+
 ### Subject Routes
 
 #### Assign Subject to Faculty
@@ -209,8 +218,8 @@
   ```json
   {
     "facultyId": "faculty_id",
-    "sunjectName":"subjectName",
-    "SubjectSem":"SubjectSem"
+    "sunjectName": "subjectName",
+    "SubjectSem": "SubjectSem"
   }
   ```
 - **Response:**
@@ -247,6 +256,10 @@
     ]
   }
   ```
+
+---
+
+### Admin Routes
 
 #### Register Admin
 - **URL:** `/api/admin/admin-register`
@@ -295,3 +308,72 @@
     "refreshToken": "refresh_token"
   }
   ```
+
+### Attendance Routes
+
+The following routes are used to manage attendance records in the system. All routes are protected and require authentication via a valid token.
+
+#### 1. Mark Attendance
+- **Endpoint:** `POST /mark-attendance`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+  - `uploadAndProcess('attendanceImage')`: Handles image upload and processing.
+- **Controller:** `markAttendance`
+- **Description:** Marks attendance for a student using the provided data.
+
+#### 2. Get All Attendance Records
+- **Endpoint:** `GET /all-attendance`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `getAllAttendance`
+- **Description:** Retrieves all attendance records.
+
+#### 3. Get Student Attendance Records
+- **Endpoint:** `GET /get-student/records`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `getStudentAttendance`
+- **Description:** Retrieves attendance records for a specific student.
+
+#### 4. Get Student Personal Attendance Sheet
+- **Endpoint:** `GET /student-sheet`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `getStudentPersonalSheet`
+- **Description:** Retrieves the personal attendance sheet for a student.
+
+#### 5. Get Subject Attendance Sheet
+- **Endpoint:** `GET /subject-sheet/:subjectId/:batch/:semester`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `getSubjectAttendanceSheet`
+- **Description:** Retrieves the Google Sheet link for a specific subject's attendance.
+
+#### 6. Sync All Attendance Data to Google Sheets
+- **Endpoint:** `POST /sync-sheets`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `syncAllAttendanceToSheets`
+- **Description:** Syncs all attendance data to Google Sheets. This route is typically restricted to admin users.
+
+#### 7. Get Attendance by ID
+- **Endpoint:** `GET /:id`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `getAttendanceById`
+- **Description:** Retrieves a specific attendance record by its ID.
+
+#### 8. Update Attendance Record
+- **Endpoint:** `PUT /:id`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `updateAttendance`
+- **Description:** Updates an existing attendance record by its ID.
+
+#### 9. Delete Attendance Record
+- **Endpoint:** `DELETE /:id`
+- **Middleware:**
+  - `authenticateToken`: Validates the faculty's token.
+- **Controller:** `deleteAttendance`
+- **Description:** Deletes an attendance record by its ID.
+---  
