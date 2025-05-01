@@ -1,0 +1,152 @@
+[{
+  "_id": {
+    "$oid": "67f94f5297ae004e5b2e21b3"
+  },
+  "username": "21esbcs006",
+  "password": "$2b$10$yGPAMUZzHxUIlpCwPAdxNeYeDuHJom5kcNmuWefVEPR3N55GKMDf6",
+  "role": "Student",
+  "name": "Ashish Kumar",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-11T17:20:18.398Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-11T17:20:18.398Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098e65dc2d2f58efd77cfa"
+  },
+  "username": "21esbcs052",
+  "password": "$2b$10$gg0llAi.57jHggY5AO/CVeq2xiDCVgw1OJA6xHhkjkCPN8dRBMJsy",
+  "role": "Student",
+  "name": "Utkarsh Verma",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:05:41.787Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:05:41.787Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098e77dc2d2f58efd77d01"
+  },
+  "username": "21esbcs053",
+  "password": "$2b$10$W6HQZfAZBoY3si8L0BvDwOtEA8rCJe/jQyMVkaI1yJF/IHJn/NSca",
+  "role": "Student",
+  "name": "Uttam Kumar",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:05:59.261Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:05:59.261Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098e96dc2d2f58efd77d08"
+  },
+  "username": "21esbca005",
+  "password": "$2b$10$k0iiloxPvS2TyqlIzy1Nrex7dCQXAtgw4.uePa6LnbCmW1m9AQYna",
+  "role": "Student",
+  "name": "Lokendra Singh ",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:06:30.517Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:06:30.517Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098eb4dc2d2f58efd77d0f"
+  },
+  "username": "21esbcs002",
+  "password": "$2b$10$7RlyzIpSvgl6nDEToaQ6kOMbxt5m5i/GlAtE8i3Kbhg7f1aB1NvP.",
+  "role": "Student",
+  "name": "Anshu Singh",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:07:00.772Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:07:00.772Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098ed2dc2d2f58efd77d16"
+  },
+  "username": "21esbcs016",
+  "password": "$2b$10$.tnBfioE.OQQaDa5pgJGguYfMmP50liOx6jtPeE4Piz25bj7BBCrC",
+  "role": "Student",
+  "name": "Govind Verma",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:07:30.356Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:07:30.356Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098ef8dc2d2f58efd77d1d"
+  },
+  "username": "21esbcs042",
+  "password": "$2b$10$1aQJGEfT2aTBrsxosn3eDORkVcy9T9xFH/27f1k7H3LcNcYnVQKSq",
+  "role": "Student",
+  "name": "Saloni Tailor",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:08:08.018Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:08:08.018Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68098f0ddc2d2f58efd77d24"
+  },
+  "username": "21esbcs049",
+  "password": "$2b$10$pXQfZ1LnGGlm5BfsH14zCuXLQw2aUe1p7WvxxK/nJP3ghizEK7VB.",
+  "role": "Student",
+  "name": "Tanishk Saini",
+  "branch": "CSE",
+  "batch": "2021",
+  "semester": 8,
+  "createdAt": {
+    "$date": "2025-04-24T01:08:29.220Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T01:08:29.220Z"
+  },
+  "__v": 0
+}]

@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   frontend:
-    # image: frontend-image:latest
     build:
       context: ./frontend
     ports:
@@ -13,20 +12,26 @@ services:
     command: npm run dev
     networks:
       - app-network
-    env_file:
-      - .env
+    environment:
+      - VITE_SPREADSHEET_ID=105Ar8i2bg1aPccDAtIut8xKvugGNYpHUcM6u1T0CZ64
+      - VITE_API_BASE_URL=http://backend_api:5000
 
-  # mongo:
-  #   image: mongo:latest
-  #   container_name: mongo
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo-data:/data/db
-  #   networks:
-  #     - app-network
+    depends_on:
+      -  backend_api
 
-  backend:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongodb-data/data:/seed
+      - ./mongodb-data/init:/docker-entrypoint-initdb.d
+
+    networks:
+      - app-network
+
+  backend_api:
     build:
       context: ./backend
     ports:
@@ -41,15 +46,21 @@ services:
       /wait-for-it.sh face:8000 -t 30 -- npm run dev"
     networks:
       - app-network
-    env_file:
-      - .env
+    environment:
+      - DB_URI=mongodb://mongo:27018
+      - PORT=5000
+      - JWT_SECRET=<your_jwt_secret>
+      - CLOUDINARY_CLOUD_NAME=<your_cloud_name>
+      - CLOUDINARY_API_KEY=<your_api_key>
+      - CLOUDINARY_API_SECRET=<your_api_secret>
+      - FACE_RECOGNITION_API_URL=http://0.0.0.0:8000
+      - SPREADSHEET_ID=<your_spreadsheet_id>
+      
     depends_on:
       - face
-    environment:
-      - FACE_RECOGNITION_API_URL=http://face:8000
-      
+      - mongo
+
   face:
-    # image: face-image:latest
     build:
       context: ./face
     container_name: face
@@ -66,4 +77,3 @@ volumes:
 
 networks:
   app-network:
-    driver: bridge
