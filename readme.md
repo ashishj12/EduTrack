@@ -179,6 +179,28 @@ EduTrack implements a secure role-based access control system with the following
 
 Note: User credentials are pre-defined in MongoDB Atlas. There is no registration route.
 
+
+## Test Credentials
+
+- Use these credentials for test the project
+
+- For Student Dashboard : 
+
+         Username : test@gmail.com
+
+         Password : test@123
+
+- For Faculty Dashboard : 
+
+         Username : test@gmail.com
+         Password : test@123
+
+- For Admin Dashboard : 
+
+         Username : test@gmail.com
+         Password : test@123
+         SecretKey : 832153
+
 ## Authors
 
 - [Ashish Kumar](https://github.com/ashishj12/EduTrack)
